@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MaterialTrack - Live Map Dashboard</title>
+    <title>MaterialTrack - Modern Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg-color: #f1f5f9; --card-bg: rgba(255, 255, 255, 0.95);
+            --bg-color: #f1f5f9; --card-bg: rgba(255, 255, 255, 0.98);
             --primary: #2563eb; --primary-hover: #1d4ed8;
             --success: #10b981; --warning: #f59e0b; --danger: #ef4444; --purple: #8b5cf6;
             --text-main: #0f172a; --text-muted: #64748b;
@@ -21,13 +21,13 @@
         }
         .container { max-width: 1400px; margin: 0 auto; }
 
-        /* Navbar & Button Tambah */
+        /* Navbar & Button */
         .navbar { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 15px 30px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .navbar .logo { font-size: 22px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 10px; }
         .btn-add { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
         .btn-add:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(37,99,235,0.3); }
 
-        /* Stats Grid (4 Kolom Sekarang) */
+        /* Stats Grid */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 25px; }
         .stat-card { background: var(--card-bg); padding: 18px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: flex-start; gap: 15px; }
         .stat-icon { width: 45px; height: 45px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 20px; flex-shrink: 0;}
@@ -40,36 +40,86 @@
         .stat-list { font-size: 16px; font-weight: 800; color: var(--text-main); display: flex; flex-direction: column; gap: 4px;}
         .unit-badge { font-size:11px; background:#e2e8f0; padding:2px 6px; border-radius:4px; color:#475569; margin-left:4px;}
 
-        /* TOP-DOWN MAP UI */
-        .map-section { background: var(--card-bg); border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 25px; }
-        .map-header { font-weight: 700; margin-bottom: 15px; color: var(--text-main); display: flex; align-items: center; gap: 8px;}
+        /* ========================================================
+           MODERN TRACKING MAP (DARK MODE HUD)
+           ======================================================== */
+        .map-section {
+            background: #0f172a; /* Dark sleek background */
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        .map-header {
+            font-weight: 700; margin-bottom: 20px; color: #f8fafc; 
+            display: flex; align-items: center; gap: 10px; font-size: 16px;
+        }
+        .map-container {
+            position: relative; height: 120px; 
+            background: #1e293b; border-radius: 16px; 
+            border: 1px solid #334155;
+            display: flex; align-items: center;
+        }
         
-        .map-container { position: relative; height: 160px; background: #dcfce7; border-radius: 12px; overflow: hidden; border: 2px solid #bbf7d0; display: flex; align-items: center;}
-        
-        /* Jalan Raya */
-        .road { position: absolute; left: 120px; right: 120px; height: 60px; background: #475569; display: flex; align-items: center;}
-        .road-line { width: 100%; height: 4px; background: repeating-linear-gradient(90deg, #fff 0, #fff 15px, transparent 15px, transparent 30px); opacity: 0.7;}
-        
-        /* Area Pabrik & Proyek */
-        .map-base { position: absolute; width: 120px; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 5; font-weight: 700; font-size: 13px; color: white;}
-        .base-supplier { left: 0; background: linear-gradient(135deg, #3b82f6, #2563eb); border-right: 4px solid #1e40af;}
-        .base-site { right: 0; background: linear-gradient(135deg, #10b981, #059669); border-left: 4px solid #047857;}
-        
-        /* Truk di Peta */
-        .map-truck { position: absolute; font-size: 26px; z-index: 10; display: flex; flex-direction: column; align-items: center;}
-        .map-truck span { font-size: 10px; background: rgba(0,0,0,0.8); color: white; padding: 2px 5px; border-radius: 4px; margin-top: -5px; font-weight: bold;}
-        
-        .truck-otw { top: 12px; animation: driveRoad 6s linear infinite; }
-        .truck-arrived { top: 60px; left: 15px; position: relative;} /* Dalam area site */
-
-        @keyframes driveRoad {
-            0% { left: 0%; transform: scaleX(1); opacity:0;}
-            5% { opacity:1; }
-            95% { opacity:1; }
-            100% { left: calc(100% - 40px); transform: scaleX(1); opacity:0;}
+        /* Titik Pangkal & Ujung (Glowing Nodes) */
+        .map-node {
+            position: absolute; width: 70px; height: 70px; border-radius: 50%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 5; font-size: 11px; font-weight: 700; color: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        .node-supplier {
+            left: 30px; background: linear-gradient(135deg, #3b82f6, #1e3a8a);
+            border: 2px solid #60a5fa; box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+        }
+        .node-site {
+            right: 30px; background: linear-gradient(135deg, #10b981, #064e3b);
+            border: 2px solid #34d399; box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
         }
 
-        /* Layout Bawah (Tracking & Edit) */
+        /* Jalur Neon (Glowing Route) */
+        .map-route {
+            position: absolute; left: 100px; right: 100px; height: 3px;
+            background: rgba(255,255,255,0.05);
+        }
+        .map-route-dash {
+            width: 100%; height: 100%;
+            background: repeating-linear-gradient(90deg, #3b82f6 0, #3b82f6 10px, transparent 10px, transparent 20px);
+            animation: moveRoute 1s linear infinite;
+        }
+        @keyframes moveRoute {
+            from { background-position: 0 0; }
+            to { background-position: -20px 0; } /* Animasi arus data */
+        }
+
+        /* Truk Modern dengan Label HUD */
+        .modern-truck {
+            position: absolute;
+            top: 50%; transform: translateY(-50%);
+            display: flex; align-items: center; gap: 8px; z-index: 10;
+        }
+        .truck-icon {
+            background: #1e293b; color: #60a5fa; padding: 8px; border-radius: 50%;
+            border: 2px solid #3b82f6; box-shadow: 0 0 15px rgba(59,130,246,0.5);
+        }
+        .truck-label {
+            background: rgba(15, 23, 42, 0.85); color: #f8fafc;
+            padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600;
+            border: 1px solid #334155; backdrop-filter: blur(4px);
+            white-space: nowrap;
+        }
+        .truck-otw { animation: modernDrive 8s linear infinite; }
+        
+        @keyframes modernDrive {
+            0% { left: 2%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { left: 90%; opacity: 0; }
+        }
+
+        /* Layout Bawah */
         .main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 25px; }
         .panel { background: var(--card-bg); border-radius: 16px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
         .tracking-panel { max-height: 60vh; overflow-y: auto; }
@@ -77,25 +127,16 @@
         /* Tracking Items */
         .tracking-item { border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 15px; background:#fff;}
         .truck-header { display: flex; justify-content: space-between; border-bottom: 1px dashed #cbd5e1; padding-bottom: 12px; margin-bottom: 12px;}
-        .progress-container { display: flex; justify-content: space-between; position: relative; margin-top: 15px;}
-        .progress-line { position: absolute; top: 15px; left: 30px; right: 30px; height: 4px; background: #e2e8f0; z-index: 1;}
-        .progress-line-fill { position: absolute; top: 15px; left: 30px; height: 4px; background: var(--primary); z-index: 2; transition: 1s;}
-        .step { position: relative; z-index: 3; text-align: center; width: 80px;}
-        .step-icon { width: 34px; height: 34px; border-radius: 50%; background: #e2e8f0; color: #94a3b8; display: flex; justify-content: center; align-items: center; margin: 0 auto 8px;}
-        .step.done .step-icon { background: var(--success); color: white; }
-        .step.active .step-icon { background: var(--primary); color: white; box-shadow: 0 0 10px rgba(37,99,235,0.4); }
-
-        /* Modal / Jendela Input Baru */
+        
+        /* Modal & Form */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 9999; }
         .modal-overlay.active { display: flex; animation: fadeIn 0.2s; }
         .modal-content { background: white; width: 100%; max-width: 500px; padding: 30px; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;}
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 20px;}
         .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #94a3b8; }
-        .close-btn:hover { color: var(--danger); }
-
-        /* Form Elements */
+        
         label { font-size: 13px; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 5px; }
-        input, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; background:#f8fafc; box-sizing: border-box;}
+        input, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 8px; background:#f8fafc; box-sizing: border-box;}
         .form-row { display: flex; gap: 15px; }
         button.action-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition:0.3s; margin-bottom:10px;}
         .btn-green { background: var(--success); color: white; }
@@ -103,7 +144,6 @@
 
         @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
         
-        /* Tab Edit/Update */
         .tabs { display: flex; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; }
         .tab-btn { background: none; border: none; padding: 10px 15px; font-weight: 600; color: #64748b; cursor: pointer; }
         .tab-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
@@ -113,87 +153,89 @@
         @media (max-width: 900px) {
             .main-grid { grid-template-columns: 1fr; }
             .navbar { flex-direction: column; gap:15px;}
-            .map-container { height: 120px; }
-            .road { left: 80px; right: 80px; height: 40px;}
-            .map-base { width: 80px; font-size: 11px;}
+            .map-route { left: 70px; right: 70px; }
+            .map-node { width: 60px; height: 60px; font-size: 10px; }
+            .node-supplier { left: 10px; }
+            .node-site { right: 10px; }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- Navbar -->
     <div class="navbar">
         <div class="logo"><i class="fa-solid fa-truck-fast"></i> MaterialTrack Pro</div>
         <button class="btn-add" onclick="openModal()"><i class="fa-solid fa-plus"></i> Input Pengiriman Baru</button>
     </div>
 
-    <!-- 4 Stats Grid (Target, Sampai, OTW, Belum Dikirim) -->
+    <!-- 4 Stats Grid -->
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-icon bg-blue"><i class="fa-solid fa-bullseye"></i></div>
             <div class="stat-info">
-                <h3>Total Target</h3>
+                <h3>Total Dipesan (Material Base)</h3>
                 <div class="stat-list" id="statTarget">Memuat...</div>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon bg-green"><i class="fa-solid fa-box-check"></i></div>
             <div class="stat-info">
-                <h3>Sudah Sampai</h3>
+                <h3>Total Diterima (Onsite)</h3>
                 <div class="stat-list" id="statSampai">Memuat...</div>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon bg-yellow"><i class="fa-solid fa-truck-moving"></i></div>
             <div class="stat-info">
-                <h3>Di Perjalanan (OTW)</h3>
+                <h3>Sedang Dikirim (OTW)</h3>
                 <div class="stat-list" id="statOtw">Memuat...</div>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon bg-purple"><i class="fa-solid fa-boxes-stacked"></i></div>
             <div class="stat-info">
-                <h3>Sisa Belum Dikirim</h3>
+                <h3>Sisa Belum Dikirim (Pabrik)</h3>
                 <div class="stat-list" id="statSisa">Memuat...</div>
             </div>
         </div>
     </div>
 
-    <!-- Top-Down Visual Map -->
+    <!-- MODERN TOP-DOWN MAP -->
     <div class="map-section">
-        <div class="map-header"><i class="fa-solid fa-map-location-dot"></i> Live Map Monitoring</div>
+        <div class="map-header">
+            <i class="fa-solid fa-satellite-dish fa-beat" style="color: #34d399;"></i> 
+            Live Logistic Network
+        </div>
         <div class="map-container">
-            <div class="map-base base-supplier">
-                <i class="fa-solid fa-industry fa-2x" style="margin-bottom: 5px;"></i> Supplier
+            <div class="map-node node-supplier">
+                <i class="fa-solid fa-industry fa-lg" style="margin-bottom: 4px;"></i> Supplier
             </div>
             
-            <div class="road" id="mapRoad">
-                <div class="road-line"></div>
-                <!-- Truk OTW akan di-inject ke sini oleh JS -->
+            <div class="map-route">
+                <div class="map-route-dash"></div>
             </div>
             
-            <div class="map-base base-site" id="mapSite">
-                <i class="fa-solid fa-person-digging fa-2x" style="margin-bottom: 5px;"></i> Onsite
-                <!-- Truk Sampai di-inject ke sini -->
+            <!-- Tempat Truk Animasi -->
+            <div id="modernMapTrucks"></div>
+            
+            <div class="map-node node-site">
+                <i class="fa-solid fa-person-digging fa-lg" style="margin-bottom: 4px;"></i> Onsite
             </div>
         </div>
     </div>
 
+    <!-- Tracking List & Actions -->
     <div class="main-grid">
-        <!-- Live Tracking Panel -->
         <div class="panel tracking-panel" id="trackingList">
-            <div style="text-align:center; padding:40px; color:var(--primary);"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><br><br>Sinkronisasi Data...</div>
+            <div style="text-align:center; padding:40px; color:var(--primary);"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><br><br>Sinkronisasi Database...</div>
         </div>
 
-        <!-- Action Panel (Update & Edit) -->
         <div class="panel">
             <div class="tabs">
                 <button class="tab-btn active" onclick="switchTab('tab-sampai', this)">Konfirmasi Sampai</button>
                 <button class="tab-btn" onclick="switchTab('tab-edit', this)">Edit Resi</button>
             </div>
 
-            <!-- Tab Konfirmasi Sampai -->
             <div id="tab-sampai" class="tab-content active">
                 <label>Pilih Truk (Resi)</label>
                 <select id="selResiSampai"></select>
@@ -204,7 +246,6 @@
                 </button>
             </div>
 
-            <!-- Tab Edit Data -->
             <div id="tab-edit" class="tab-content">
                 <label>Pilih Resi Yang Salah</label>
                 <select id="selResiEdit" onchange="loadEditForm()"></select>
@@ -228,7 +269,7 @@
     </div>
 </div>
 
-<!-- JENDELA BARU (MODAL) UNTUK INPUT PENGIRIMAN -->
+<!-- MODAL INPUT PENGIRIMAN BARU -->
 <div class="modal-overlay" id="addModal">
     <div class="modal-content">
         <div class="modal-header">
@@ -243,7 +284,6 @@
         
         <label>Item Material</label>
         <input type="text" id="addItem" placeholder="Contoh: PAVING DC10N 21x10">
-        
         <label>Mutu</label>
         <input type="text" id="addMutu" placeholder="Contoh: K500">
         
@@ -251,10 +291,9 @@
             <div style="flex:2;"><label>Jumlah</label><input type="number" id="addJumlah" step="0.01" placeholder="0"></div>
             <div style="flex:1;"><label>Satuan</label><input type="text" id="addSatuan" placeholder="m2 / pcs"></div>
         </div>
-        
         <div class="form-row">
-            <div style="flex:1;"><label>Nama Pengemudi</label><input type="text" id="addSopir" placeholder="Nama Supir"></div>
-            <div style="flex:1;"><label>Plat Kendaraan</label><input type="text" id="addPlat" placeholder="Misal: B 1234 CD"></div>
+            <div style="flex:1;"><label>Nama Pengemudi</label><input type="text" id="addSopir"></div>
+            <div style="flex:1;"><label>Plat Kendaraan</label><input type="text" id="addPlat"></div>
         </div>
 
         <button class="action-btn btn-green" onclick="submitPengirimanBaru()" id="btnAddSubmit" style="margin-top:10px;">
@@ -279,7 +318,7 @@
             dataPesanan = data.pesanan;
             
             calculateStats();
-            renderMapUI();
+            renderModernMap();
             renderTrackingUI();
             populateDropdowns();
         } catch (e) {
@@ -287,20 +326,28 @@
         }
     }
 
-    // Kalkulasi 4 Kolom: Target, Sampai, OTW, Belum Dikirim (Sisa murni)
+    // LOGIKA KALKULASI YANG DIPERBAIKI (Absolute Base Target)
     function calculateStats() {
         globalStats = {};
         
+        // 1. TOTAL TARGET murni hanya mengambil dari sheet Master Pesanan (Material Base)
         dataPesanan.forEach(p => {
             let unit = (p['SATUAN'] || 'm2').toLowerCase().trim();
-            if(!globalStats[unit]) globalStats[unit] = { target: 0, sampai: 0, otw: 0, sisa: 0 };
+            if(!globalStats[unit]) {
+                globalStats[unit] = { target: 0, sampai: 0, otw: 0, sisa: 0 };
+            }
             globalStats[unit].target += parseFloat(p['TOTAL PESANAN']) || 0;
         });
 
+        // 2. Kalkulasi barang yang sudah masuk / sedang dijalan
         dataPengiriman.forEach(row => {
             if(!row['NO']) return;
             let unit = (row['SATUAN'] || 'm2').toLowerCase().trim();
-            if(!globalStats[unit]) globalStats[unit] = { target: 0, sampai: 0, otw: 0, sisa: 0 };
+            
+            // Jaga-jaga jika ada satuan di pengiriman yang tidak ditulis di Master Pesanan
+            if(!globalStats[unit]) {
+                globalStats[unit] = { target: 0, sampai: 0, otw: 0, sisa: 0 };
+            }
             
             let jumlah = parseFloat(row['JUMLAH']) || 0;
             if(row['TANGGAL SAMPAI'] !== "") {
@@ -310,12 +357,12 @@
             }
         });
 
+        // 3. Kalkulasi Sisa Pabrik (Target - Diterima - OTW)
         let hTarget = '', hSampai = '', hOtw = '', hSisa = '';
         for(let unit in globalStats) {
             let s = globalStats[unit];
-            // Sisa Belum Dikirim = Target - (Sampai + OTW)
-            s.sisa = s.target - s.sampai - s.otw;
-            if(s.sisa < 0) s.sisa = 0;
+            s.sisa = s.target - (s.sampai + s.otw);
+            if(s.sisa < 0) s.sisa = 0; // Cegah minus
 
             let badg = `<span class="unit-badge">${unit}</span>`;
             hTarget += `<div>${s.target.toLocaleString('id-ID')} ${badg}</div>`;
@@ -330,61 +377,41 @@
         document.getElementById('statSisa').innerHTML = hSisa || '0';
     }
 
-    // Render Animasi Truk di Peta (Live Map)
-    function renderMapUI() {
-        const road = document.getElementById('mapRoad');
-        const site = document.getElementById('mapSite');
+    // Render Modern Dark Map Animasi
+    function renderModernMap() {
+        const truckContainer = document.getElementById('modernMapTrucks');
+        truckContainer.innerHTML = ''; 
         
-        // Bersihkan truk lama, simpan jalan
-        road.innerHTML = '<div class="road-line"></div>'; 
-        // Kembalikan base site ke default
-        site.innerHTML = '<i class="fa-solid fa-person-digging fa-2x" style="margin-bottom: 5px;"></i> Onsite';
+        let otwCount = 0;
         
-        let arrivedCount = 0;
-        
-        dataPengiriman.forEach((row, i) => {
+        dataPengiriman.forEach((row) => {
             if(!row['NO']) return;
             
             if(row['TANGGAL SAMPAI'] === "") {
-                // TRUK OTW - Di jalan tol
-                const delay = (i % 5) * 1.5; // Supaya truk tidak menumpuk, beri delay animasi beda-beda
-                road.innerHTML += `
-                    <div class="map-truck truck-otw" style="color: #fca5a5; animation-delay: -${delay}s;">
-                        <i class="fa-solid fa-truck"></i>
-                        <span>${row['PLAT KENDARAAN']}</span>
+                // Berikan jeda animasi beda-beda agar truk tidak tumpah tindih
+                const delay = (otwCount * 2.5); 
+                truckContainer.innerHTML += `
+                    <div class="modern-truck truck-otw" style="animation-delay: -${delay}s;">
+                        <div class="truck-icon"><i class="fa-solid fa-truck-moving"></i></div>
+                        <div class="truck-label">${row['PLAT KENDARAAN']} <span style="color:#60a5fa;">(${row['JUMLAH']}${row['SATUAN']})</span></div>
                     </div>
                 `;
-            } else {
-                // TRUK SAMPAI - Di lokasi onsite
-                if(arrivedCount < 4) { // Tampilkan maks 4 truk di site agar tidak penuh
-                    site.innerHTML += `
-                        <div style="color: #fff; font-size:16px; margin-top:2px;">
-                            <i class="fa-solid fa-truck-ramp-box"></i>
-                        </div>
-                    `;
-                    arrivedCount++;
-                }
+                otwCount++;
             }
         });
     }
 
+    // Render List Tabel Kiri
     function renderTrackingUI() {
         const container = document.getElementById('trackingList');
         container.innerHTML = ''; 
-        const isMobile = window.innerWidth <= 900;
-
         const sortedData = [...dataPengiriman].reverse();
+        
         sortedData.forEach(row => {
             if(!row['NO']) return;
-            
             const isArrived = row['TANGGAL SAMPAI'] !== "";
             const tBerangkat = row['TANGGAL BERANGKAT'] ? new Date(row['TANGGAL BERANGKAT']).toLocaleDateString('id-ID') : '-';
             const tSampai = isArrived ? new Date(row['TANGGAL SAMPAI']).toLocaleDateString('id-ID') : '-';
-            
-            const fillStyle = isMobile ? (isArrived ? 'height: 100%;' : 'height: 50%;') : (isArrived ? 'width: 100%;' : 'width: 50%;');
-            const step2Class = 'done';
-            const step3Class = isArrived ? 'done' : 'active';
-            const tIcon = isArrived ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-truck fa-bounce"></i>';
 
             container.innerHTML += `
                 <div class="tracking-item">
@@ -392,23 +419,17 @@
                         <strong style="color:var(--primary); font-size:15px;">#${row['NO']} - ${row['ITEM']}</strong>
                         ${isArrived ? '<span style="background:#ecfdf5; color:var(--success); padding:4px 10px; border-radius:8px; font-size:12px; font-weight:bold;">Terkirim</span>' : '<span style="background:#fffbeb; color:var(--warning); padding:4px 10px; border-radius:8px; font-size:12px; font-weight:bold;">OTW</span>'}
                     </div>
-                    <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted); margin-bottom:5px;">
+                    <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted);">
                         <div><i class="fa-solid fa-user-tie"></i> ${row['NAMA PENGEMUDI']}</div>
                         <div><i class="fa-solid fa-car"></i> <b>${row['PLAT KENDARAAN']}</b></div>
                         <div><i class="fa-solid fa-cube"></i> <b>${row['JUMLAH']} ${row['SATUAN']}</b></div>
-                    </div>
-                    <div class="progress-container">
-                        <div class="progress-line"></div>
-                        <div class="progress-line-fill" style="${fillStyle}"></div>
-                        <div class="step done"><div class="step-icon"><i class="fa-solid fa-box"></i></div><div style="font-size:11px; color:#64748b; font-weight:bold;">Muat</div></div>
-                        <div class="step ${step2Class}"><div class="step-icon"><i class="fa-solid fa-road"></i></div><div style="font-size:11px; color:#64748b; font-weight:bold;">${tBerangkat}</div></div>
-                        <div class="step ${step3Class}"><div class="step-icon" style="background:${isArrived?'var(--success)':'var(--primary)'}; color:white;">${tIcon}</div><div style="font-size:11px; color:#64748b; font-weight:bold;">${isArrived ? tSampai : 'Onsite'}</div></div>
                     </div>
                 </div>
             `;
         });
     }
 
+    // Load Dropdown Form
     function populateDropdowns() {
         const selS = document.getElementById('selResiSampai');
         const selE = document.getElementById('selResiEdit');
@@ -423,7 +444,7 @@
         });
     }
 
-    // Modal Control
+    // Modal Control & UI Switcher
     function openModal() { document.getElementById('addModal').classList.add('active'); }
     function closeModal() { document.getElementById('addModal').classList.remove('active'); }
     function switchTab(t, el) {
@@ -443,6 +464,7 @@
         }
     }
 
+    // Core API Logic
     async function reqApi(payload, btnId, lText, oText) {
         let btn = document.getElementById(btnId);
         btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${lText}...`; btn.disabled = true;
@@ -471,27 +493,17 @@
         }, 'btnEdit', 'Menyimpan', '<i class="fa-solid fa-pen"></i> Simpan Perubahan');
     }
 
-    // Fungsi Tambah Baru dari Modal
     function submitPengirimanBaru() {
         let no = document.getElementById('addNo').value;
-        if(!no) return alert("No Resi / DO Wajib Diisi!");
-        
+        if(!no) return alert("No Resi Wajib Diisi!");
         let payload = {
-            action: 'tambah_resi',
-            no: no,
-            tgl_berangkat: document.getElementById('addTgl').value,
-            item: document.getElementById('addItem').value,
-            mutu: document.getElementById('addMutu').value,
-            jumlah: document.getElementById('addJumlah').value,
-            satuan: document.getElementById('addSatuan').value,
-            pengemudi: document.getElementById('addSopir').value,
-            plat: document.getElementById('addPlat').value
+            action: 'tambah_resi', no: no, tgl_berangkat: document.getElementById('addTgl').value,
+            item: document.getElementById('addItem').value, mutu: document.getElementById('addMutu').value,
+            jumlah: document.getElementById('addJumlah').value, satuan: document.getElementById('addSatuan').value,
+            pengemudi: document.getElementById('addSopir').value, plat: document.getElementById('addPlat').value
         };
-
         reqApi(payload, 'btnAddSubmit', 'Menyimpan', '<i class="fa-solid fa-paper-plane"></i> Kirim Data & Simpan').then(() => {
-            closeModal(); // Tutup modal jika sukses
-            // Reset form
-            document.querySelectorAll('#addModal input').forEach(inp => inp.value = '');
+            closeModal(); document.querySelectorAll('#addModal input').forEach(inp => inp.value = '');
         });
     }
 
@@ -501,15 +513,14 @@
         for(let u in globalStats) {
             let s = globalStats[u];
             text += `*Satuan: ${u.toUpperCase()}*\n`;
-            text += ` 🎯 Target : ${s.target.toLocaleString('id-ID')} ${u}\n`;
-            text += ` ✅ Sampai : ${s.sampai.toLocaleString('id-ID')} ${u}\n`;
-            text += ` 🚚 OTW    : ${s.otw.toLocaleString('id-ID')} ${u}\n`;
-            text += ` ⏳ SISA   : ${s.sisa.toLocaleString('id-ID')} ${u}\n\n`;
+            text += ` 🎯 Total Dipesan : ${s.target.toLocaleString('id-ID')} ${u}\n`;
+            text += ` ✅ Diterima Site : ${s.sampai.toLocaleString('id-ID')} ${u}\n`;
+            text += ` 🚚 OTW Jalan     : ${s.otw.toLocaleString('id-ID')} ${u}\n`;
+            text += ` ⏳ Sisa di Pabrik: ${s.sisa.toLocaleString('id-ID')} ${u}\n\n`;
         }
         window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
     }
 
-    window.addEventListener('resize', renderTrackingUI);
     window.onload = init;
 </script>
 </body>
