@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MaterialTrack - Master Base Edition</title>
+    <title>MaterialTrack - Diagram Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -30,23 +30,23 @@
         .btn-add:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
         .btn-blue { background: var(--primary); }
         .btn-purple { background: var(--purple); }
+        .btn-green { background: var(--success); }
 
-        /* Stats Grid */
+        /* General Stats Grid (Overview) */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 25px; }
-        .stat-card { background: var(--card-bg); padding: 18px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: flex-start; gap: 15px; }
-        .stat-icon { width: 45px; height: 45px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 20px; flex-shrink: 0;}
+        .stat-card { background: var(--card-bg); padding: 18px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 15px; }
+        .stat-icon { width: 55px; height: 55px; border-radius: 14px; display: flex; justify-content: center; align-items: center; font-size: 24px; flex-shrink: 0;}
         .bg-blue { background: #eff6ff; color: var(--primary); }
         .bg-green { background: #ecfdf5; color: var(--success); }
         .bg-yellow { background: #fffbeb; color: var(--warning); }
         .bg-purple { background: #faf5ff; color: var(--purple); }
         
-        .stat-info h3 { margin: 0; font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom:8px;}
-        .stat-list { font-size: 16px; font-weight: 800; color: var(--text-main); display: flex; flex-direction: column; gap: 4px;}
-        .unit-badge { font-size:11px; background:#e2e8f0; padding:2px 6px; border-radius:4px; color:#475569; margin-left:4px;}
+        .stat-info h3 { margin: 0; font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom:5px;}
+        .stat-list { font-size: 26px; font-weight: 800; color: var(--text-main); }
 
         /* MAP UI */
         .map-section { background: #0f172a; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); margin-bottom: 25px; position: relative; overflow: hidden; }
-        .map-header { font-weight: 700; margin-bottom: 20px; color: #f8fafc; display: flex; align-items: center; gap: 10px; font-size: 16px; }
+        .map-header { font-weight: 700; margin-bottom: 20px; color: #f8fafc; display: flex; justify-content: space-between; align-items: center; font-size: 16px; }
         .map-container { position: relative; height: 120px; background: #1e293b; border-radius: 16px; border: 1px solid #334155; display: flex; align-items: center; }
         .map-node { position: absolute; width: 70px; height: 70px; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 5; font-size: 11px; font-weight: 700; color: white; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
         .node-supplier { left: 30px; background: linear-gradient(135deg, #3b82f6, #1e3a8a); border: 2px solid #60a5fa; box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
@@ -68,18 +68,38 @@
         .tracking-item { border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 15px; background:#fff;}
         .truck-header { display: flex; justify-content: space-between; border-bottom: 1px dashed #cbd5e1; padding-bottom: 12px; margin-bottom: 12px;}
         
-        /* Modals */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 9999; }
+        /* Modals & Diagram UI */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 9999; }
         .modal-overlay.active { display: flex; animation: fadeIn 0.2s; }
         .modal-content { background: white; width: 100%; max-width: 500px; padding: 30px; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;}
+        
+        /* Modal Lebar Khusus Diagram */
+        .modal-large { max-width: 800px; }
+
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 20px;}
         .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #94a3b8; }
         
+        /* Modern Progress Diagram Cards */
+        .diag-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 15px; transition: 0.3s;}
+        .diag-item:hover { border-color: #cbd5e1; box-shadow: 0 5px 15px rgba(0,0,0,0.05);}
+        .diag-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: 700; color: #0f172a; font-size: 15px;}
+        
+        .diag-bar-bg { width: 100%; height: 12px; background: #e2e8f0; border-radius: 6px; overflow: hidden; display: flex; margin-bottom: 12px;}
+        .diag-fill-sampai { height: 100%; background: var(--success); transition: 1s ease-out;}
+        .diag-fill-otw { height: 100%; background: var(--warning); transition: 1s ease-out;}
+        
+        .diag-stats { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600;}
+        .d-box { padding: 6px 12px; border-radius: 6px; border: 1px solid #e2e8f0; display:flex; flex-direction:column; align-items:center; flex:1; margin:0 5px;}
+        .d-box span { font-size: 10px; color: #64748b; text-transform: uppercase; margin-bottom: 3px;}
+        .d-target { background: #eff6ff; color: var(--primary); border-color: #bfdbfe;}
+        .d-sampai { background: #ecfdf5; color: var(--success); border-color: #a7f3d0;}
+        .d-otw { background: #fffbeb; color: var(--warning); border-color: #fde68a;}
+        .d-sisa { background: #faf5ff; color: var(--purple); border-color: #e9d5ff;}
+
         label { font-size: 13px; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 5px; }
         input, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 8px; background:#f8fafc; box-sizing: border-box;}
         .form-row { display: flex; gap: 15px; }
         button.action-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition:0.3s; margin-bottom:10px;}
-        .btn-green { background: var(--success); color: white; }
         .btn-whatsapp { background: #25D366; color: white; margin-top:20px; }
 
         @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
@@ -92,10 +112,8 @@
 
         @media (max-width: 900px) {
             .main-grid { grid-template-columns: 1fr; }
-            .map-route { left: 70px; right: 70px; }
-            .map-node { width: 60px; height: 60px; font-size: 10px; }
-            .node-supplier { left: 10px; }
-            .node-site { right: 10px; }
+            .diag-stats { flex-wrap: wrap; }
+            .d-box { min-width: 40%; margin-bottom: 10px; }
         }
     </style>
 </head>
@@ -105,40 +123,39 @@
     <div class="navbar">
         <div class="logo"><i class="fa-solid fa-layer-group"></i> MaterialTrack Pro</div>
         <div class="nav-actions">
-            <!-- Dua Tombol Form -->
-            <button class="btn-add btn-purple" onclick="openModal('pesananModal')"><i class="fa-solid fa-cart-plus"></i> Input Pesanan Base</button>
-            <button class="btn-add btn-blue" onclick="openModal('addModal')"><i class="fa-solid fa-truck"></i> Input Pengiriman (DO)</button>
+            <button class="btn-add btn-purple" onclick="openModal('pesananModal')"><i class="fa-solid fa-cart-plus"></i> Target Pesanan</button>
+            <button class="btn-add btn-blue" onclick="openModal('addModal')"><i class="fa-solid fa-truck"></i> Input DO Pengiriman</button>
         </div>
     </div>
 
-    <!-- 4 Stats Grid -->
+    <!-- GENERAL OVERVIEW STATS (Tidak membedakan satuan, murni performa logistic) -->
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-icon bg-blue"><i class="fa-solid fa-bullseye"></i></div>
+            <div class="stat-icon bg-blue"><i class="fa-solid fa-cubes"></i></div>
             <div class="stat-info">
-                <h3>Total Dipesan (Material Base)</h3>
-                <div class="stat-list" id="statTarget">Memuat...</div>
+                <h3>Jenis Material</h3>
+                <div class="stat-list" id="statJenis">0</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon bg-green"><i class="fa-solid fa-box-check"></i></div>
+            <div class="stat-icon bg-green"><i class="fa-solid fa-flag-checkered"></i></div>
             <div class="stat-info">
-                <h3>Total Diterima (Onsite)</h3>
-                <div class="stat-list" id="statSampai">Memuat...</div>
+                <h3>Item Komplit Selesai</h3>
+                <div class="stat-list" id="statSelesai">0</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon bg-purple"><i class="fa-solid fa-truck-ramp-box"></i></div>
+            <div class="stat-info">
+                <h3>Total Truk Sampai</h3>
+                <div class="stat-list" id="statTrukSampai">0</div>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon bg-yellow"><i class="fa-solid fa-truck-moving"></i></div>
             <div class="stat-info">
-                <h3>Sedang Dikirim (OTW)</h3>
-                <div class="stat-list" id="statOtw">Memuat...</div>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon bg-purple"><i class="fa-solid fa-boxes-stacked"></i></div>
-            <div class="stat-info">
-                <h3>Sisa Belum Dikirim (Pabrik)</h3>
-                <div class="stat-list" id="statSisa">Memuat...</div>
+                <h3>Truk Sedang OTW</h3>
+                <div class="stat-list" id="statTrukOtw">0</div>
             </div>
         </div>
     </div>
@@ -146,7 +163,9 @@
     <!-- MODERN TOP-DOWN MAP -->
     <div class="map-section">
         <div class="map-header">
-            <i class="fa-solid fa-satellite-dish fa-beat" style="color: #34d399;"></i> Live Logistic Network
+            <div><i class="fa-solid fa-satellite-dish fa-beat" style="color: #34d399;"></i> Live Logistic Network</div>
+            <!-- TOMBOL BUKA DIAGRAM -->
+            <button class="btn-add btn-green" onclick="openModal('diagramModal')" style="box-shadow: 0 0 15px rgba(16,185,129,0.4);"><i class="fa-solid fa-chart-pie"></i> Buka Diagram Detail Material</button>
         </div>
         <div class="map-container">
             <div class="map-node node-supplier"><i class="fa-solid fa-industry fa-lg" style="margin-bottom: 4px;"></i> Supplier</div>
@@ -217,8 +236,8 @@
         <label>Mutu</label>
         <input type="text" id="addMutu" placeholder="Contoh: K350">
         <div class="form-row">
-            <div style="flex:2;"><label>Jumlah</label><input type="number" id="addJumlah" step="0.01" placeholder="0"></div>
-            <div style="flex:1;"><label>Satuan</label><input type="text" id="addSatuan" placeholder="pcs / m2"></div>
+            <div style="flex:2;"><label>Jumlah</label><input type="number" id="addJumlah" step="0.01"></div>
+            <div style="flex:1;"><label>Satuan</label><input type="text" id="addSatuan"></div>
         </div>
         <div class="form-row">
             <div style="flex:1;"><label>Nama Pengemudi</label><input type="text" id="addSopir"></div>
@@ -230,31 +249,36 @@
     </div>
 </div>
 
-<!-- ================= MODAL 2: INPUT MASTER PESANAN ================= -->
+<!-- ================= MODAL 2: INPUT TARGET PESANAN ================= -->
 <div class="modal-overlay" id="pesananModal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3 style="margin:0; color:var(--purple);"><i class="fa-solid fa-cart-plus"></i> Input Master Pesanan Base</h3>
+            <h3 style="margin:0; color:var(--purple);"><i class="fa-solid fa-cart-plus"></i> Input Master Target</h3>
             <button class="close-btn" onclick="closeModal('pesananModal')"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        
         <label>Nama Item Material (Base)</label>
-        <input type="text" id="pesananItem" placeholder="Contoh: UDITCH 60x60 atau PAVING DC10N">
-        
+        <input type="text" id="pesananItem" placeholder="Contoh: UDITCH 60x60">
         <div class="form-row">
-            <div style="flex:2;">
-                <label>Total Target Pesanan</label>
-                <input type="number" id="pesananJumlah" step="0.01" placeholder="1000">
-            </div>
-            <div style="flex:1;">
-                <label>Satuan</label>
-                <input type="text" id="pesananSatuan" placeholder="pcs / m2">
-            </div>
+            <div style="flex:2;"><label>Total Target</label><input type="number" id="pesananJumlah" step="0.01"></div>
+            <div style="flex:1;"><label>Satuan</label><input type="text" id="pesananSatuan"></div>
         </div>
-
         <button class="action-btn" style="background:var(--purple); color:white; margin-top:10px;" onclick="submitPesananBaru()" id="btnPesananSubmit">
             <i class="fa-solid fa-save"></i> Simpan Target Pesanan
         </button>
+    </div>
+</div>
+
+<!-- ================= MODAL 3: DIAGRAM DETAIL PER ITEM ================= -->
+<div class="modal-overlay" id="diagramModal">
+    <div class="modal-content modal-large">
+        <div class="modal-header" style="position:sticky; top:-30px; background:white; z-index:10; padding-top:30px; margin-top:-30px;">
+            <h3 style="margin:0; color:var(--text-main); font-size:18px;"><i class="fa-solid fa-chart-bar" style="color:var(--primary);"></i> Progress & Sisa Per Item Material</h3>
+            <button class="close-btn" onclick="closeModal('diagramModal')"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        
+        <div id="diagramContainer">
+            <div style="text-align:center; padding:20px; color:#94a3b8;"><i class="fa-solid fa-spinner fa-spin"></i> Menghitung Kalkulasi...</div>
+        </div>
     </div>
 </div>
 
@@ -264,7 +288,7 @@
 
     let dataPengiriman = [];
     let dataPesanan = [];
-    let globalStats = {}; 
+    let itemStats = {}; // Akan menyimpan rekap PER ITEM murni (bukan per satuan)
 
     async function init() {
         try {
@@ -273,7 +297,7 @@
             dataPengiriman = data.pengiriman;
             dataPesanan = data.pesanan;
             
-            calculateStats();
+            calculatePerItemStats();
             renderModernMap();
             renderTrackingUI();
             populateDropdowns();
@@ -282,56 +306,138 @@
         }
     }
 
-    // Kalkulasi Total membaca kolom SATUAN dari Master_Pesanan secara dinamis
-    function calculateStats() {
-        globalStats = {};
-        
-        // 1. Target dari Master Pesanan (sekarang baca kolom SATUAN)
+    // ==========================================
+    // LOGIKA PERHITUNGAN MURNI PER ITEM
+    // ==========================================
+    function calculatePerItemStats() {
+        itemStats = {};
+        let totalJenis = 0;
+        let totalTrukSampai = 0;
+        let totalTrukOtw = 0;
+        let totalSelesai = 0;
+
+        // 1. Ambil data dari Master Pesanan (Berdasarkan NAMA ITEM)
         dataPesanan.forEach(p => {
-            if(!p['ITEM']) return;
-            // Jika kolom SATUAN kosong di GSheet, anggap m2 sebagai fallback sementara
-            let unit = (p['SATUAN'] || 'm2').toLowerCase().trim();
-            if(!globalStats[unit]) {
-                globalStats[unit] = { target: 0, sampai: 0, otw: 0, sisa: 0 };
+            let itemName = (p['ITEM'] || '').trim().toUpperCase();
+            if(!itemName) return;
+            
+            if(!itemStats[itemName]) {
+                itemStats[itemName] = { target: 0, sampai: 0, otw: 0, sisa: 0, satuan: p['SATUAN'] || 'unit' };
+                totalJenis++;
             }
-            globalStats[unit].target += parseFloat(p['TOTAL PESANAN']) || 0;
+            itemStats[itemName].target += parseFloat(p['TOTAL PESANAN']) || 0;
         });
 
-        // 2. Kalkulasi Pengiriman (OTW & Sampai)
+        // 2. Tambahkan data dari Pengiriman (Cocokkan dengan NAMA ITEM)
         dataPengiriman.forEach(row => {
             if(!row['NO']) return;
-            let unit = (row['SATUAN'] || 'm2').toLowerCase().trim();
+            let itemName = (row['ITEM'] || '').trim().toUpperCase();
             
-            if(!globalStats[unit]) {
-                globalStats[unit] = { target: 0, sampai: 0, otw: 0, sisa: 0 };
+            // Jika ada barang dikirim yang belum ada di target, tetap munculkan
+            if(!itemStats[itemName]) {
+                itemStats[itemName] = { target: 0, sampai: 0, otw: 0, sisa: 0, satuan: row['SATUAN'] || 'unit' };
+                totalJenis++;
             }
             
             let jumlah = parseFloat(row['JUMLAH']) || 0;
             if(row['TANGGAL SAMPAI'] !== "") {
-                globalStats[unit].sampai += jumlah;
+                itemStats[itemName].sampai += jumlah;
+                totalTrukSampai++;
             } else {
-                globalStats[unit].otw += jumlah;
+                itemStats[itemName].otw += jumlah;
+                totalTrukOtw++;
             }
         });
 
-        // 3. Render Panel
-        let hTarget = '', hSampai = '', hOtw = '', hSisa = '';
-        for(let unit in globalStats) {
-            let s = globalStats[unit];
+        // 3. Render Top Overview Grid & Siapkan Data untuk Diagram
+        for(let key in itemStats) {
+            let s = itemStats[key];
             s.sisa = s.target - (s.sampai + s.otw);
-            if(s.sisa < 0) s.sisa = 0; 
+            if(s.sisa < 0) s.sisa = 0;
+            
+            // Cek apakah item ini sudah 100% selesai
+            if(s.target > 0 && s.sampai >= s.target) {
+                totalSelesai++;
+            }
+        }
 
-            let badg = `<span class="unit-badge">${unit}</span>`;
-            hTarget += `<div>${s.target.toLocaleString('id-ID')} ${badg}</div>`;
-            hSampai += `<div>${s.sampai.toLocaleString('id-ID')} ${badg}</div>`;
-            hOtw += `<div>${s.otw.toLocaleString('id-ID')} ${badg}</div>`;
-            hSisa += `<div>${s.sisa.toLocaleString('id-ID')} ${badg}</div>`;
+        document.getElementById('statJenis').innerText = totalJenis;
+        document.getElementById('statSelesai').innerText = totalSelesai;
+        document.getElementById('statTrukSampai').innerText = totalTrukSampai;
+        document.getElementById('statTrukOtw').innerText = totalTrukOtw;
+
+        // 4. Render Diagram Detail
+        renderDiagrams();
+    }
+
+    // ==========================================
+    // RENDER DIAGRAM PROGRESS PER ITEM
+    // ==========================================
+    function renderDiagrams() {
+        const container = document.getElementById('diagramContainer');
+        container.innerHTML = '';
+        
+        let hasData = false;
+        
+        for(let item in itemStats) {
+            hasData = true;
+            let s = itemStats[item];
+            let sat = s.satuan.toLowerCase();
+            
+            // Hitung Persentase (Maksimal 100%)
+            let safeTarget = s.target > 0 ? s.target : (s.sampai + s.otw) || 1; // Cegah div/0
+            let pctSampai = (s.sampai / safeTarget) * 100;
+            let pctOtw = (s.otw / safeTarget) * 100;
+            
+            // Batasi persentase visual mentok di 100 agar grafik tidak pecah
+            if(pctSampai > 100) pctSampai = 100;
+            if((pctSampai + pctOtw) > 100) pctOtw = 100 - pctSampai;
+
+            // Indikator Status
+            let statusText = "";
+            if(s.target > 0 && s.sampai >= s.target) {
+                statusText = `<span style="color:var(--success); font-size:12px;"><i class="fa-solid fa-circle-check"></i> Selesai 100%</span>`;
+            } else if (s.target == 0) {
+                statusText = `<span style="color:var(--warning); font-size:12px;">! Target Belum Diatur</span>`;
+            } else {
+                statusText = `<span style="color:var(--text-muted); font-size:12px;">Progress: ${pctSampai.toFixed(1)}%</span>`;
+            }
+
+            container.innerHTML += `
+                <div class="diag-item">
+                    <div class="diag-header">
+                        <div><i class="fa-solid fa-cube" style="color:#94a3b8; margin-right:5px;"></i> ${item}</div>
+                        ${statusText}
+                    </div>
+                    
+                    <div class="diag-bar-bg">
+                        <div class="diag-fill-sampai" style="width: ${pctSampai}%;"></div>
+                        <div class="diag-fill-otw" style="width: ${pctOtw}%;"></div>
+                    </div>
+                    
+                    <div class="diag-stats">
+                        <div class="d-box d-target">
+                            <span>Target</span>
+                            <b>${s.target.toLocaleString('id-ID')} ${sat}</b>
+                        </div>
+                        <div class="d-box d-sampai">
+                            <span>Sampai Site</span>
+                            <b>${s.sampai.toLocaleString('id-ID')} ${sat}</b>
+                        </div>
+                        <div class="d-box d-otw">
+                            <span>Dalam Jalan (OTW)</span>
+                            <b>${s.otw.toLocaleString('id-ID')} ${sat}</b>
+                        </div>
+                        <div class="d-box d-sisa">
+                            <span>Sisa Pabrik</span>
+                            <b>${s.sisa.toLocaleString('id-ID')} ${sat}</b>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
         
-        document.getElementById('statTarget').innerHTML = hTarget || '0';
-        document.getElementById('statSampai').innerHTML = hSampai || '0';
-        document.getElementById('statOtw').innerHTML = hOtw || '0';
-        document.getElementById('statSisa').innerHTML = hSisa || '0';
+        if(!hasData) container.innerHTML = `<div style="text-align:center; color:#94a3b8;">Belum ada data pesanan/pengiriman.</div>`;
     }
 
     function renderModernMap() {
@@ -387,7 +493,6 @@
         });
     }
 
-    // Modal Switchers
     function openModal(id) { document.getElementById(id).classList.add('active'); }
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
     function switchTab(t, el) {
@@ -407,7 +512,6 @@
         }
     }
 
-    // API Request Logic
     async function reqApi(payload, btnId, lText, oText) {
         let btn = document.getElementById(btnId);
         btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${lText}...`; btn.disabled = true;
@@ -453,9 +557,7 @@
         let target = document.getElementById('pesananJumlah').value;
         let sat = document.getElementById('pesananSatuan').value;
         if(!item || !target || !sat) return alert("Semua kolom Master Pesanan wajib diisi!");
-        
         let payload = { action: 'tambah_pesanan', item: item, total_pesanan: target, satuan: sat };
-        
         reqApi(payload, 'btnPesananSubmit', 'Menyimpan Base', '<i class="fa-solid fa-save"></i> Simpan Target Pesanan').then(() => {
             closeModal('pesananModal'); document.querySelectorAll('#pesananModal input').forEach(inp => inp.value = '');
         });
@@ -463,15 +565,19 @@
 
     function shareWhatsApp() {
         let text = `*🚧 REPORT LOGISTIK ONSITE*\nTanggal: ${new Date().toLocaleDateString('id-ID')}\n\n`;
-        text += `*📊 STATUS PESANAN:*\n`;
-        for(let u in globalStats) {
-            let s = globalStats[u];
-            text += `*Satuan: ${u.toUpperCase()}*\n`;
-            text += ` 🎯 Total Dipesan : ${s.target.toLocaleString('id-ID')} ${u}\n`;
-            text += ` ✅ Diterima Site : ${s.sampai.toLocaleString('id-ID')} ${u}\n`;
-            text += ` 🚚 OTW Jalan     : ${s.otw.toLocaleString('id-ID')} ${u}\n`;
-            text += ` ⏳ Sisa di Pabrik: ${s.sisa.toLocaleString('id-ID')} ${u}\n\n`;
+        text += `*📊 PROGRESS MATERIAL PER ITEM:*\n`;
+        
+        let i = 1;
+        for(let key in itemStats) {
+            let s = itemStats[key];
+            text += `*${i}. ${key}*\n`;
+            text += ` 🎯 Target : ${s.target.toLocaleString('id-ID')} ${s.satuan}\n`;
+            text += ` ✅ Sampai : ${s.sampai.toLocaleString('id-ID')} ${s.satuan}\n`;
+            text += ` 🚚 OTW    : ${s.otw.toLocaleString('id-ID')} ${s.satuan}\n`;
+            text += ` ⏳ Sisa   : ${s.sisa.toLocaleString('id-ID')} ${s.satuan}\n\n`;
+            i++;
         }
+        
         window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
     }
 
