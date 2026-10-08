@@ -3,176 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Rekapan Pengeluaran Pembeli</title>
+    <title>Sistem Manajemen Material</title>
     <style>
-        :root {
-            --primary: #2c3e50;
-            --secondary: #34495e;
-            --accent: #3498db;
-            --bg: #f4f7f6;
-        }
+        :root { --primary: #2c3e50; --accent: #3498db; --bg: #f4f7f6; --success: #2ecc71; --warning: #f1c40f; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
         
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
-            margin: 0;
-            padding: 20px;
-            color: var(--primary);
-        }
+        /* Tab CSS */
+        .tabs { display: flex; border-bottom: 2px solid #ddd; margin-bottom: 20px; }
+        .tab-btn { background: none; border: none; padding: 10px 20px; cursor: pointer; font-size: 16px; font-weight: bold; color: #777; transition: 0.3s; }
+        .tab-btn.active { color: var(--accent); border-bottom: 3px solid var(--accent); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.5s ease; }
 
-        .dashboard-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.05);
-            /* Animasi masuk awal */
-            animation: slideDown 0.8s ease-out forwards;
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: var(--primary);
-            border-bottom: 2px solid var(--accent);
-            padding-bottom: 10px;
-            display: inline-block;
-        }
-
-        .header-container { text-align: center; }
-
-        .table-responsive {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        th, td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        th {
-            background-color: var(--secondary);
-            color: white;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.9em;
-        }
-
-        /* Animasi baris tabel */
-        tbody tr {
-            opacity: 0;
-            transform: translateX(-10px);
-            animation: fadeRight 0.5s ease-out forwards;
-            transition: all 0.3s ease;
-        }
-
-        tbody tr:hover {
-            background-color: #f1f8ff;
-            transform: scale(1.01);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .loading {
-            text-align: center;
-            font-size: 1.2em;
-            color: var(--accent);
-            animation: pulse 1.5s infinite;
-        }
-
-        /* Keyframes Animasi */
-        @keyframes slideDown {
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeRight {
-            to { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes pulse {
-            0% { opacity: 0.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: var(--primary); color: white; }
+        
+        /* Animasi Truk & Status */
+        .status-badge { padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 12px; display: inline-flex; align-items: center; gap: 8px; }
+        .status-otw { background-color: #fff3cd; color: #856404; }
+        .status-arrived { background-color: #d4edda; color: #155724; }
+        
+        .truck { font-size: 16px; }
+        .moving-truck { animation: drive 2s linear infinite; display: inline-block; }
+        
+        @keyframes drive {
+            0% { transform: translateX(-5px); opacity: 0; }
             50% { opacity: 1; }
-            100% { opacity: 0.6; }
+            100% { transform: translateX(15px); opacity: 0; }
         }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Form Input */
+        .update-box { background: #eef2f5; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; }
+        input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 8px 15px; background: var(--accent); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #2980b9; }
     </style>
 </head>
 <body>
 
-    <div class="dashboard-container">
-        <div class="header-container">
-            <h1>Dashboard Rekapan Pengeluaran Pembeli</h1>
-        </div>
-        
-        <div id="loader" class="loading">Memuat data secara live...</div>
-
-        <div class="table-responsive">
-            <table id="dataTable" style="display:none;">
-                <thead>
-                    <tr>
-                        <th>NO</th>
-                        <th>ITEM</th>
-                        <th>MUTU</th>
-                        <th>JUMLAH</th>
-                        <th>SATUAN</th>
-                        <th>PLAT KENDARAAN</th>
-                        <th>NAMA PENGEMUDI</th>
-                        <th>TGL BERANGKAT</th>
-                        <th>TGL SAMPAI</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <!-- Data dari Sheets akan dimuat di sini -->
-                </tbody>
-            </table>
-        </div>
+<div class="container">
+    <h2 style="color: var(--primary); text-align: center;">Dashboard Material & Pengeluaran Pembeli</h2>
+    
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab('tab-pengiriman', this)">Rekap Pengiriman</button>
+        <button class="tab-btn" onclick="openTab('tab-pesanan', this)">Status & Sisa Pesanan</button>
     </div>
 
-    <script>
-        // GANTI URL DI BAWAH INI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
-        const API_URL = 'https://script.google.com/macros/s/AKfycbx1sqFB04reLD2XM9CFJUITXSyP50hizXX4TsYfflOx9Q6SuEp0mFzuF7YfuskXWa97/exec';
+    <!-- TAB 1: PENGIRIMAN -->
+    <div id="tab-pengiriman" class="tab-content active">
+        
+        <div class="update-box">
+            <strong>Update Kedatangan Barang dari Web:</strong>
+            <input type="number" id="inputNo" placeholder="Masukkan NO. Pengiriman">
+            <input type="date" id="inputTglSampai">
+            <button onclick="updateSampai()">Konfirmasi Barang Sampai</button>
+            <span id="updateStatus" style="color: var(--success); font-weight:bold; margin-left:10px;"></span>
+        </div>
 
-        async function fetchData() {
-            try {
-                const response = await fetch(API_URL);
-                const data = await response.json();
-                
-                const tbody = document.getElementById('tableBody');
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('dataTable').style.display = 'table';
-                
-                data.forEach((row, index) => {
-                    const tr = document.createElement('tr');
-                    // Memberikan jeda waktu (delay) untuk setiap baris agar muncul satu per satu (efek waterfall)
-                    tr.style.animationDelay = `${index * 0.1}s`;
-                    
-                    tr.innerHTML = `
-                        <td>${row['NO'] || ''}</td>
-                        <td>${row['ITEM'] || ''}</td>
-                        <td>${row['MUTU'] || ''}</td>
-                        <td>${row['JUMLAH'] || ''}</td>
-                        <td>${row['SATUAN'] || ''}</td>
-                        <td>${row['PLAT KENDARAAN'] || ''}</td>
-                        <td>${row['NAMA PENGEMUDI'] || ''}</td>
-                        <td>${row['TANGGAL BERANGKAT'] || ''}</td>
-                        <td>${row['TANGGAL SAMPAI'] || ''}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            } catch (error) {
-                document.getElementById('loader').innerText = 'Gagal memuat data. Periksa koneksi atau URL Apps Script.';
-                console.error('Error fetching data:', error);
+        <table id="tablePengiriman">
+            <thead>
+                <tr>
+                    <th>NO</th><th>ITEM</th><th>JUMLAH</th><th>SATUAN</th><th>PENGEMUDI</th><th>TGL BERANGKAT</th><th>TGL SAMPAI</th><th>STATUS ONSITE</th>
+                </tr>
+            </thead>
+            <tbody><!-- Dimuat via JS --></tbody>
+        </table>
+    </div>
+
+    <!-- TAB 2: SISA PESANAN -->
+    <div id="tab-pesanan" class="tab-content">
+        <table id="tablePesanan">
+            <thead>
+                <tr>
+                    <th>ITEM MATERIAL</th><th>TOTAL TARGET PESANAN</th><th>SUDAH TERKIRIM (SAMPAI)</th><th>SISA KEKURANGAN PESANAN</th>
+                </tr>
+            </thead>
+            <tbody><!-- Dimuat via JS --></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // GANTI DENGAN URL APPS SCRIPT ANDA
+    const API_URL = 'https://script.google.com/macros/s/AKfycbx1sqFB04reLD2XM9CFJUITXSyP50hizXX4TsYfflOx9Q6SuEp0mFzuF7YfuskXWa97/exec'; 
+
+    let globalData = {};
+
+    function openTab(tabName, element) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+        element.classList.add('active');
+    }
+
+    async function loadData() {
+        document.getElementById('updateStatus').innerText = 'Memuat data...';
+        const response = await fetch(API_URL);
+        globalData = await response.json();
+        
+        renderPengiriman(globalData.pengiriman);
+        renderSisaPesanan(globalData.pengiriman, globalData.pesanan);
+        document.getElementById('updateStatus').innerText = '';
+    }
+
+    function renderPengiriman(data) {
+        const tbody = document.querySelector('#tablePengiriman tbody');
+        tbody.innerHTML = '';
+        data.forEach(row => {
+            const isArrived = row['TANGGAL SAMPAI'] !== "";
+            const tglBerangkat = row['TANGGAL BERANGKAT'] ? new Date(row['TANGGAL BERANGKAT']).toLocaleDateString('id-ID') : '';
+            const tglSampai = isArrived ? new Date(row['TANGGAL SAMPAI']).toLocaleDateString('id-ID') : '';
+            
+            // Logika Animasi
+            let statusHtml = '';
+            if(isArrived) {
+                statusHtml = `<span class="status-badge status-arrived"><span class="truck">✅</span> Sampai di Site</span>`;
+            } else {
+                statusHtml = `<span class="status-badge status-otw"><span class="truck moving-truck">🚚</span> Sedang Dikirim</span>`;
             }
-        }
 
-        // Panggil fungsi saat halaman dimuat
-        window.onload = fetchData;
-    </script>
+            tbody.innerHTML += `
+                <tr>
+                    <td><b>${row['NO']}</b></td>
+                    <td>${row['ITEM']}</td>
+                    <td>${row['JUMLAH']}</td>
+                    <td>${row['SATUAN']}</td>
+                    <td>${row['NAMA PENGEMUDI']} (${row['PLAT KENDARAAN']})</td>
+                    <td>${tglBerangkat}</td>
+                    <td>${tglSampai}</td>
+                    <td>${statusHtml}</td>
+                </tr>
+            `;
+        });
+    }
+
+    function renderSisaPesanan(pengiriman, masterPesanan) {
+        // Kalkulasi: Hitung total barang yang SUDAH SAMPAI per ITEM
+        let totalSampaiPerItem = {};
+        pengiriman.forEach(row => {
+            // Hanya hitung yang tanggal sampainya sudah terisi (sudah sampai di onsite)
+            if(row['TANGGAL SAMPAI'] !== "") {
+                const item = row['ITEM'];
+                const jumlah = parseFloat(row['JUMLAH']) || 0;
+                totalSampaiPerItem[item] = (totalSampaiPerItem[item] || 0) + jumlah;
+            }
+        });
+
+        const tbody = document.querySelector('#tablePesanan tbody');
+        tbody.innerHTML = '';
+        
+        masterPesanan.forEach(pesanan => {
+            const item = pesanan['ITEM'];
+            const target = parseFloat(pesanan['TOTAL PESANAN']) || 0;
+            const terkumpul = totalSampaiPerItem[item] || 0;
+            const sisa = target - terkumpul;
+
+            // Jika sisa 0 atau minus, berarti pesanan komplit
+            const statusSisa = sisa <= 0 ? `<span style="color:green; font-weight:bold;">Terkirim Semua 🎉</span>` : `<span style="color:red; font-weight:bold;">Kurang ${sisa.toFixed(2)}</span>`;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td><b>${item}</b></td>
+                    <td>${target.toFixed(2)}</td>
+                    <td style="color:var(--success); font-weight:bold;">${terkumpul.toFixed(2)}</td>
+                    <td>${statusSisa}</td>
+                </tr>
+            `;
+        });
+    }
+
+    async function updateSampai() {
+        const no = document.getElementById('inputNo').value;
+        const tgl = document.getElementById('inputTglSampai').value;
+        
+        if(!no || !tgl) { alert("Harap isi No Pengiriman dan Tanggal Sampai!"); return; }
+        
+        document.getElementById('updateStatus').innerText = 'Menyimpan ke server... ⏳';
+        
+        // POST Request tanpa membuka Google Sheets
+        await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'update_sampai', no: no, tanggal_sampai: tgl }),
+            headers: { "Content-Type": "text/plain;charset=utf-8" }
+        });
+
+        document.getElementById('updateStatus').innerText = 'Berhasil diupdate! Memuat ulang tabel...';
+        document.getElementById('inputNo').value = '';
+        document.getElementById('inputTglSampai').value = '';
+        
+        // Refresh tabel secara otomatis setelah update
+        loadData(); 
+    }
+
+    // Panggil saat web pertama kali dibuka
+    window.onload = loadData;
+</script>
 </body>
 </html>
