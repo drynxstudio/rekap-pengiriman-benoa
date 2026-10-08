@@ -3,109 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MaterialTrack Pro</title>
-    <!-- Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Icon -->
+    <title>MaterialTrack - Live Map Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg-color: #f1f5f9;
-            --card-bg: rgba(255, 255, 255, 0.98);
-            --primary: #2563eb;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
+            --bg-color: #f1f5f9; --card-bg: rgba(255, 255, 255, 0.95);
+            --primary: #2563eb; --primary-hover: #1d4ed8;
+            --success: #10b981; --warning: #f59e0b; --danger: #ef4444; --purple: #8b5cf6;
+            --text-main: #0f172a; --text-muted: #64748b;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
+            font-family: 'Inter', sans-serif; background-color: var(--bg-color);
             margin: 0; padding: 20px; color: var(--text-main);
-            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
-            background-size: 20px 20px;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 20px 20px;
         }
-
         .container { max-width: 1400px; margin: 0 auto; }
 
+        /* Navbar & Button Tambah */
         .navbar { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 15px 30px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .navbar .logo { font-size: 22px; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        .navbar .logo { font-size: 22px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        .btn-add { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
+        .btn-add:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(37,99,235,0.3); }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 25px; }
-        .stat-card { background: var(--card-bg); padding: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: flex-start; gap: 15px; }
-        .stat-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 24px; flex-shrink: 0;}
+        /* Stats Grid (4 Kolom Sekarang) */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: var(--card-bg); padding: 18px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: flex-start; gap: 15px; }
+        .stat-icon { width: 45px; height: 45px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 20px; flex-shrink: 0;}
         .bg-blue { background: #eff6ff; color: var(--primary); }
         .bg-green { background: #ecfdf5; color: var(--success); }
         .bg-yellow { background: #fffbeb; color: var(--warning); }
+        .bg-purple { background: #faf5ff; color: var(--purple); }
         
-        .stat-info h3 { margin: 0; font-size: 14px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom:8px;}
-        .stat-list { font-size: 18px; font-weight: 700; color: var(--text-main); display: flex; flex-direction: column; gap: 5px;}
-        .unit-badge { font-size:12px; background:#e2e8f0; padding:2px 6px; border-radius:6px; color:#475569; margin-left:5px;}
+        .stat-info h3 { margin: 0; font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom:8px;}
+        .stat-list { font-size: 16px; font-weight: 800; color: var(--text-main); display: flex; flex-direction: column; gap: 4px;}
+        .unit-badge { font-size:11px; background:#e2e8f0; padding:2px 6px; border-radius:4px; color:#475569; margin-left:4px;}
 
-        .main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 25px; }
+        /* TOP-DOWN MAP UI */
+        .map-section { background: var(--card-bg); border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 25px; }
+        .map-header { font-weight: 700; margin-bottom: 15px; color: var(--text-main); display: flex; align-items: center; gap: 8px;}
         
-        .panel { background: var(--card-bg); border-radius: 16px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        .tracking-panel { max-height: 70vh; overflow-y: auto; }
+        .map-container { position: relative; height: 160px; background: #dcfce7; border-radius: 12px; overflow: hidden; border: 2px solid #bbf7d0; display: flex; align-items: center;}
         
-        .tracking-item { border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 15px; transition: 0.3s; background:#fff;}
-        .tracking-item:hover { transform: translateY(-3px); box-shadow: 0 10px 20px -5px rgba(0,0,0,0.08); border-color:#cbd5e1;}
-        .truck-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding-bottom: 12px; margin-bottom: 12px;}
+        /* Jalan Raya */
+        .road { position: absolute; left: 120px; right: 120px; height: 60px; background: #475569; display: flex; align-items: center;}
+        .road-line { width: 100%; height: 4px; background: repeating-linear-gradient(90deg, #fff 0, #fff 15px, transparent 15px, transparent 30px); opacity: 0.7;}
         
-        /* Modern UI Progress Bar */
-        .progress-container { display: flex; justify-content: space-between; position: relative; margin-top: 15px; padding: 0 10px;}
-        .progress-line { position: absolute; top: 15px; left: 30px; right: 30px; height: 4px; background: #e2e8f0; z-index: 1; border-radius:4px;}
-        .progress-line-fill { position: absolute; top: 15px; left: 30px; height: 4px; background: var(--primary); z-index: 2; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); border-radius:4px; width:0;}
+        /* Area Pabrik & Proyek */
+        .map-base { position: absolute; width: 120px; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 5; font-weight: 700; font-size: 13px; color: white;}
+        .base-supplier { left: 0; background: linear-gradient(135deg, #3b82f6, #2563eb); border-right: 4px solid #1e40af;}
+        .base-site { right: 0; background: linear-gradient(135deg, #10b981, #059669); border-left: 4px solid #047857;}
         
-        .step { position: relative; z-index: 3; text-align: center; width: 80px;}
-        .step-icon { width: 34px; height: 34px; border-radius: 50%; background: #e2e8f0; color: #94a3b8; display: flex; justify-content: center; align-items: center; margin: 0 auto 8px; font-size: 14px; transition: 0.5s; border: 3px solid #fff;}
-        .step.done .step-icon { background: var(--success); color: white; }
-        .step.active .step-icon { background: var(--primary); color: white; animation: pulse-glow 2s infinite; }
-        .step-text { font-size: 12px; color: var(--text-muted); font-weight: 600;}
+        /* Truk di Peta */
+        .map-truck { position: absolute; font-size: 26px; z-index: 10; display: flex; flex-direction: column; align-items: center;}
+        .map-truck span { font-size: 10px; background: rgba(0,0,0,0.8); color: white; padding: 2px 5px; border-radius: 4px; margin-top: -5px; font-weight: bold;}
+        
+        .truck-otw { top: 12px; animation: driveRoad 6s linear infinite; }
+        .truck-arrived { top: 60px; left: 15px; position: relative;} /* Dalam area site */
 
-        /* Animasi */
-        @keyframes pulse-glow {
-            0% { box-shadow: 0 0 0 0 rgba(37,99,235, 0.5); }
-            70% { box-shadow: 0 0 0 10px rgba(37,99,235, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(37,99,235, 0); }
+        @keyframes driveRoad {
+            0% { left: 0%; transform: scaleX(1); opacity:0;}
+            5% { opacity:1; }
+            95% { opacity:1; }
+            100% { left: calc(100% - 40px); transform: scaleX(1); opacity:0;}
         }
-        .css-truck { display: inline-block; animation: bounce-truck 1s infinite alternate; }
-        @keyframes bounce-truck { from {transform: translateY(0);} to {transform: translateY(-4px);} }
 
-        /* Forms */
-        .tabs { display: flex; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; }
-        .tab-btn { background: none; border: none; padding: 10px 20px; font-weight: 600; color: #64748b; cursor: pointer; border-bottom: 3px solid transparent; }
-        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
-        .tab-content { display: none; animation: fadeIn 0.4s ease; }
-        .tab-content.active { display: block; }
+        /* Layout Bawah (Tracking & Edit) */
+        .main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 25px; }
+        .panel { background: var(--card-bg); border-radius: 16px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .tracking-panel { max-height: 60vh; overflow-y: auto; }
         
-        @keyframes fadeIn { from {opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(0);} }
+        /* Tracking Items */
+        .tracking-item { border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 15px; background:#fff;}
+        .truck-header { display: flex; justify-content: space-between; border-bottom: 1px dashed #cbd5e1; padding-bottom: 12px; margin-bottom: 12px;}
+        .progress-container { display: flex; justify-content: space-between; position: relative; margin-top: 15px;}
+        .progress-line { position: absolute; top: 15px; left: 30px; right: 30px; height: 4px; background: #e2e8f0; z-index: 1;}
+        .progress-line-fill { position: absolute; top: 15px; left: 30px; height: 4px; background: var(--primary); z-index: 2; transition: 1s;}
+        .step { position: relative; z-index: 3; text-align: center; width: 80px;}
+        .step-icon { width: 34px; height: 34px; border-radius: 50%; background: #e2e8f0; color: #94a3b8; display: flex; justify-content: center; align-items: center; margin: 0 auto 8px;}
+        .step.done .step-icon { background: var(--success); color: white; }
+        .step.active .step-icon { background: var(--primary); color: white; box-shadow: 0 0 10px rgba(37,99,235,0.4); }
 
+        /* Modal / Jendela Input Baru */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 9999; }
+        .modal-overlay.active { display: flex; animation: fadeIn 0.2s; }
+        .modal-content { background: white; width: 100%; max-width: 500px; padding: 30px; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;}
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 20px;}
+        .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #94a3b8; }
+        .close-btn:hover { color: var(--danger); }
+
+        /* Form Elements */
         label { font-size: 13px; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 5px; }
-        input, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; background:#f8fafc;}
-        input:focus, select:focus { outline:none; border-color:var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
-        
-        button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition:0.3s;}
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: #1d4ed8; }
-        .btn-warning { background: var(--warning); color: white; }
-        .btn-warning:hover { background: #d97706; }
-        .btn-whatsapp { background: #25D366; color: white; margin-top: 20px; }
-        .btn-whatsapp:hover { background: #1da851; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; background:#f8fafc; box-sizing: border-box;}
+        .form-row { display: flex; gap: 15px; }
+        button.action-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition:0.3s; margin-bottom:10px;}
+        .btn-green { background: var(--success); color: white; }
+        .btn-whatsapp { background: #25D366; color: white; margin-top:20px; }
 
-        /* RESPONSIVE SMARTPHONE MODE */
+        @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+        
+        /* Tab Edit/Update */
+        .tabs { display: flex; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; }
+        .tab-btn { background: none; border: none; padding: 10px 15px; font-weight: 600; color: #64748b; cursor: pointer; }
+        .tab-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+
         @media (max-width: 900px) {
             .main-grid { grid-template-columns: 1fr; }
-            .navbar { flex-direction: column; gap:10px; padding:15px; }
-            .stats-grid { grid-template-columns: 1fr; }
-            
-            /* Ubah tracking bar jadi vertikal di HP */
-            .progress-container { flex-direction: column; align-items: flex-start; gap: 20px; padding-left: 15px;}
-            .progress-line { width: 4px; height: calc(100% - 30px); top: 15px; left: 30px; }
-            .progress-line-fill { width: 4px; height: 0; top: 15px; left: 30px; transition: height 1s; }
-            .step { display: flex; align-items: center; gap: 15px; width: 100%; text-align: left; }
-            .step-icon { margin: 0; }
+            .navbar { flex-direction: column; gap:15px;}
+            .map-container { height: 120px; }
+            .road { left: 80px; right: 80px; height: 40px;}
+            .map-base { width: 80px; font-size: 11px;}
         }
     </style>
 </head>
@@ -114,31 +124,58 @@
 <div class="container">
     <!-- Navbar -->
     <div class="navbar">
-        <div class="logo"><i class="fa-solid fa-cube"></i> MaterialTrack Pro</div>
-        <div style="font-size:14px; font-weight:600;"><i class="fa-solid fa-satellite-dish" style="color:var(--success); animation: pulse-glow 2s infinite; border-radius:50%;"></i> Sinkronisasi Aktif</div>
+        <div class="logo"><i class="fa-solid fa-truck-fast"></i> MaterialTrack Pro</div>
+        <button class="btn-add" onclick="openModal()"><i class="fa-solid fa-plus"></i> Input Pengiriman Baru</button>
     </div>
 
-    <!-- Stats Panel -->
+    <!-- 4 Stats Grid (Target, Sampai, OTW, Belum Dikirim) -->
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-icon bg-blue"><i class="fa-solid fa-bullseye"></i></div>
             <div class="stat-info">
-                <h3>Total Target Pesanan</h3>
-                <div class="stat-list" id="statTarget">Loading...</div>
+                <h3>Total Target</h3>
+                <div class="stat-list" id="statTarget">Memuat...</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon bg-green"><i class="fa-solid fa-check-double"></i></div>
+            <div class="stat-icon bg-green"><i class="fa-solid fa-box-check"></i></div>
             <div class="stat-info">
-                <h3>Sudah Diterima</h3>
-                <div class="stat-list" id="statTerkumpul">Loading...</div>
+                <h3>Sudah Sampai</h3>
+                <div class="stat-list" id="statSampai">Memuat...</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon bg-yellow"><i class="fa-solid fa-boxes-open"></i></div>
+            <div class="stat-icon bg-yellow"><i class="fa-solid fa-truck-moving"></i></div>
             <div class="stat-info">
-                <h3>Sisa Kekurangan</h3>
-                <div class="stat-list" id="statSisa">Loading...</div>
+                <h3>Di Perjalanan (OTW)</h3>
+                <div class="stat-list" id="statOtw">Memuat...</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon bg-purple"><i class="fa-solid fa-boxes-stacked"></i></div>
+            <div class="stat-info">
+                <h3>Sisa Belum Dikirim</h3>
+                <div class="stat-list" id="statSisa">Memuat...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top-Down Visual Map -->
+    <div class="map-section">
+        <div class="map-header"><i class="fa-solid fa-map-location-dot"></i> Live Map Monitoring</div>
+        <div class="map-container">
+            <div class="map-base base-supplier">
+                <i class="fa-solid fa-industry fa-2x" style="margin-bottom: 5px;"></i> Supplier
+            </div>
+            
+            <div class="road" id="mapRoad">
+                <div class="road-line"></div>
+                <!-- Truk OTW akan di-inject ke sini oleh JS -->
+            </div>
+            
+            <div class="map-base base-site" id="mapSite">
+                <i class="fa-solid fa-person-digging fa-2x" style="margin-bottom: 5px;"></i> Onsite
+                <!-- Truk Sampai di-inject ke sini -->
             </div>
         </div>
     </div>
@@ -146,76 +183,93 @@
     <div class="main-grid">
         <!-- Live Tracking Panel -->
         <div class="panel tracking-panel" id="trackingList">
-            <div style="text-align:center; padding:40px; color:var(--primary);"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><br><br>Memuat Data Pengiriman...</div>
+            <div style="text-align:center; padding:40px; color:var(--primary);"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><br><br>Sinkronisasi Data...</div>
         </div>
 
-        <!-- Action Panel -->
+        <!-- Action Panel (Update & Edit) -->
         <div class="panel">
             <div class="tabs">
                 <button class="tab-btn active" onclick="switchTab('tab-sampai', this)">Konfirmasi Sampai</button>
                 <button class="tab-btn" onclick="switchTab('tab-edit', this)">Edit Resi</button>
             </div>
 
-            <!-- Tab: Update Sampai -->
+            <!-- Tab Konfirmasi Sampai -->
             <div id="tab-sampai" class="tab-content active">
-                <label>Pilih Pengiriman (Resi)</label>
-                <select id="selResiSampai">
-                    <option value="">-- Pilih Truk Menuju Site --</option>
-                </select>
-                
-                <label>Tanggal Sampai</label>
+                <label>Pilih Truk (Resi)</label>
+                <select id="selResiSampai"></select>
+                <label>Tanggal Sampai Onsite</label>
                 <input type="date" id="inTglSampai">
-                
-                <button class="btn-primary" onclick="updateSampai()" id="btnSampai">
-                    <i class="fa-solid fa-location-dot"></i> Tandai Barang Sampai
+                <button class="action-btn btn-green" onclick="updateSampai()" id="btnSampai">
+                    <i class="fa-solid fa-check"></i> Tandai Barang Sampai
                 </button>
             </div>
 
-            <!-- Tab: Edit Data Resi -->
+            <!-- Tab Edit Data -->
             <div id="tab-edit" class="tab-content">
-                <label>Pilih Resi Yang Akan Diedit</label>
-                <select id="selResiEdit" onchange="loadEditForm()">
-                    <option value="">-- Pilih Resi --</option>
-                </select>
-
-                <div style="background:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0;">
-                    <label>No Resi / Pengiriman Baru</label>
-                    <input type="text" id="editNo" placeholder="Misal: 1 atau RESI-01">
-                    
-                    <div style="display:flex; gap:10px;">
-                        <div style="flex:2;">
-                            <label>Jumlah</label>
-                            <input type="number" id="editJumlah" step="0.01">
-                        </div>
-                        <div style="flex:1;">
-                            <label>Satuan</label>
-                            <input type="text" id="editSatuan" placeholder="m2 / pcs">
-                        </div>
+                <label>Pilih Resi Yang Salah</label>
+                <select id="selResiEdit" onchange="loadEditForm()"></select>
+                <div style="background:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom: 10px;">
+                    <label>No Resi</label><input type="text" id="edNo">
+                    <div class="form-row">
+                        <div style="flex:2"><label>Jumlah</label><input type="number" id="edJml" step="0.01"></div>
+                        <div style="flex:1"><label>Satuan</label><input type="text" id="edSat"></div>
                     </div>
-
-                    <label>Plat Kendaraan</label>
-                    <input type="text" id="editPlat" placeholder="Misal: B 1234 CD">
-                    
-                    <button class="btn-warning" onclick="simpanEdit()" id="btnEdit">
-                        <i class="fa-solid fa-pen-to-square"></i> Simpan Perubahan
-                    </button>
+                    <label>Plat</label><input type="text" id="edPlat">
                 </div>
+                <button class="action-btn" style="background:var(--warning); color:white;" onclick="simpanEdit()" id="btnEdit">
+                    <i class="fa-solid fa-pen"></i> Simpan Perubahan
+                </button>
             </div>
 
-            <button class="btn-whatsapp" onclick="shareWhatsApp()">
-                <i class="fa-brands fa-whatsapp fa-lg"></i> Share Laporan ke WhatsApp
+            <button class="action-btn btn-whatsapp" onclick="shareWhatsApp()">
+                <i class="fa-brands fa-whatsapp fa-lg"></i> Share Laporan WhatsApp
             </button>
         </div>
     </div>
 </div>
 
+<!-- JENDELA BARU (MODAL) UNTUK INPUT PENGIRIMAN -->
+<div class="modal-overlay" id="addModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 style="margin:0;"><i class="fa-solid fa-truck-ramp-box"></i> Input Pengiriman Baru</h3>
+            <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        
+        <div class="form-row">
+            <div style="flex:1;"><label>No Resi / DO</label><input type="text" id="addNo" placeholder="Contoh: DO-01"></div>
+            <div style="flex:1;"><label>Tanggal Berangkat</label><input type="date" id="addTgl"></div>
+        </div>
+        
+        <label>Item Material</label>
+        <input type="text" id="addItem" placeholder="Contoh: PAVING DC10N 21x10">
+        
+        <label>Mutu</label>
+        <input type="text" id="addMutu" placeholder="Contoh: K500">
+        
+        <div class="form-row">
+            <div style="flex:2;"><label>Jumlah</label><input type="number" id="addJumlah" step="0.01" placeholder="0"></div>
+            <div style="flex:1;"><label>Satuan</label><input type="text" id="addSatuan" placeholder="m2 / pcs"></div>
+        </div>
+        
+        <div class="form-row">
+            <div style="flex:1;"><label>Nama Pengemudi</label><input type="text" id="addSopir" placeholder="Nama Supir"></div>
+            <div style="flex:1;"><label>Plat Kendaraan</label><input type="text" id="addPlat" placeholder="Misal: B 1234 CD"></div>
+        </div>
+
+        <button class="action-btn btn-green" onclick="submitPengirimanBaru()" id="btnAddSubmit" style="margin-top:10px;">
+            <i class="fa-solid fa-paper-plane"></i> Kirim Data & Simpan
+        </button>
+    </div>
+</div>
+
 <script>
-    // MASUKKAN URL APPS SCRIPT ANDA DI SINI
+    // MASUKKAN URL APPS SCRIPT ANDA DI BAWAH INI
     const API_URL = 'https://script.google.com/macros/s/AKfycbx1sqFB04reLD2XM9CFJUITXSyP50hizXX4TsYfflOx9Q6SuEp0mFzuF7YfuskXWa97/exec'; 
 
     let dataPengiriman = [];
     let dataPesanan = [];
-    let globalStats = {}; // Akan memisahkan m2, pcs, dll
+    let globalStats = {}; 
 
     async function init() {
         try {
@@ -224,51 +278,94 @@
             dataPengiriman = data.pengiriman;
             dataPesanan = data.pesanan;
             
-            calculateUnits();
+            calculateStats();
+            renderMapUI();
             renderTrackingUI();
             populateDropdowns();
         } catch (e) {
-            document.getElementById('trackingList').innerHTML = `<div style="color:red; text-align:center;">Gagal Terhubung ke Database.</div>`;
+            document.getElementById('trackingList').innerHTML = `<div style="color:red; text-align:center;">Gagal Terhubung. Cek URL API.</div>`;
         }
     }
 
-    // Pemisahan Satuan Otomatis (m2, pcs, dll)
-    function calculateUnits() {
+    // Kalkulasi 4 Kolom: Target, Sampai, OTW, Belum Dikirim (Sisa murni)
+    function calculateStats() {
         globalStats = {};
         
-        // Target dari Master Pesanan
         dataPesanan.forEach(p => {
             let unit = (p['SATUAN'] || 'm2').toLowerCase().trim();
-            if(!globalStats[unit]) globalStats[unit] = { target: 0, terkumpul: 0, sisa: 0 };
+            if(!globalStats[unit]) globalStats[unit] = { target: 0, sampai: 0, otw: 0, sisa: 0 };
             globalStats[unit].target += parseFloat(p['TOTAL PESANAN']) || 0;
         });
 
-        // Hitung yang sudah sampai
         dataPengiriman.forEach(row => {
+            if(!row['NO']) return;
+            let unit = (row['SATUAN'] || 'm2').toLowerCase().trim();
+            if(!globalStats[unit]) globalStats[unit] = { target: 0, sampai: 0, otw: 0, sisa: 0 };
+            
+            let jumlah = parseFloat(row['JUMLAH']) || 0;
             if(row['TANGGAL SAMPAI'] !== "") {
-                let unit = (row['SATUAN'] || 'm2').toLowerCase().trim();
-                if(!globalStats[unit]) globalStats[unit] = { target: 0, terkumpul: 0, sisa: 0 };
-                globalStats[unit].terkumpul += parseFloat(row['JUMLAH']) || 0;
+                globalStats[unit].sampai += jumlah;
+            } else {
+                globalStats[unit].otw += jumlah;
             }
         });
 
-        // Render ke UI
-        let htmlTarget = '', htmlTerkumpul = '', htmlSisa = '';
+        let hTarget = '', hSampai = '', hOtw = '', hSisa = '';
         for(let unit in globalStats) {
-            let target = globalStats[unit].target;
-            let kumpul = globalStats[unit].terkumpul;
-            let sisa = target - kumpul;
-            if(sisa < 0) sisa = 0;
-            globalStats[unit].sisa = sisa; // Simpan untuk WA
+            let s = globalStats[unit];
+            // Sisa Belum Dikirim = Target - (Sampai + OTW)
+            s.sisa = s.target - s.sampai - s.otw;
+            if(s.sisa < 0) s.sisa = 0;
 
-            htmlTarget += `<div>${target.toLocaleString('id-ID')} <span class="unit-badge">${unit}</span></div>`;
-            htmlTerkumpul += `<div>${kumpul.toLocaleString('id-ID')} <span class="unit-badge">${unit}</span></div>`;
-            htmlSisa += `<div>${sisa.toLocaleString('id-ID')} <span class="unit-badge">${unit}</span></div>`;
+            let badg = `<span class="unit-badge">${unit}</span>`;
+            hTarget += `<div>${s.target.toLocaleString('id-ID')} ${badg}</div>`;
+            hSampai += `<div>${s.sampai.toLocaleString('id-ID')} ${badg}</div>`;
+            hOtw += `<div>${s.otw.toLocaleString('id-ID')} ${badg}</div>`;
+            hSisa += `<div>${s.sisa.toLocaleString('id-ID')} ${badg}</div>`;
         }
         
-        document.getElementById('statTarget').innerHTML = htmlTarget || '0';
-        document.getElementById('statTerkumpul').innerHTML = htmlTerkumpul || '0';
-        document.getElementById('statSisa').innerHTML = htmlSisa || '0';
+        document.getElementById('statTarget').innerHTML = hTarget || '0';
+        document.getElementById('statSampai').innerHTML = hSampai || '0';
+        document.getElementById('statOtw').innerHTML = hOtw || '0';
+        document.getElementById('statSisa').innerHTML = hSisa || '0';
+    }
+
+    // Render Animasi Truk di Peta (Live Map)
+    function renderMapUI() {
+        const road = document.getElementById('mapRoad');
+        const site = document.getElementById('mapSite');
+        
+        // Bersihkan truk lama, simpan jalan
+        road.innerHTML = '<div class="road-line"></div>'; 
+        // Kembalikan base site ke default
+        site.innerHTML = '<i class="fa-solid fa-person-digging fa-2x" style="margin-bottom: 5px;"></i> Onsite';
+        
+        let arrivedCount = 0;
+        
+        dataPengiriman.forEach((row, i) => {
+            if(!row['NO']) return;
+            
+            if(row['TANGGAL SAMPAI'] === "") {
+                // TRUK OTW - Di jalan tol
+                const delay = (i % 5) * 1.5; // Supaya truk tidak menumpuk, beri delay animasi beda-beda
+                road.innerHTML += `
+                    <div class="map-truck truck-otw" style="color: #fca5a5; animation-delay: -${delay}s;">
+                        <i class="fa-solid fa-truck"></i>
+                        <span>${row['PLAT KENDARAAN']}</span>
+                    </div>
+                `;
+            } else {
+                // TRUK SAMPAI - Di lokasi onsite
+                if(arrivedCount < 4) { // Tampilkan maks 4 truk di site agar tidak penuh
+                    site.innerHTML += `
+                        <div style="color: #fff; font-size:16px; margin-top:2px;">
+                            <i class="fa-solid fa-truck-ramp-box"></i>
+                        </div>
+                    `;
+                    arrivedCount++;
+                }
+            }
+        });
     }
 
     function renderTrackingUI() {
@@ -281,172 +378,137 @@
             if(!row['NO']) return;
             
             const isArrived = row['TANGGAL SAMPAI'] !== "";
-            const tglBerangkat = row['TANGGAL BERANGKAT'] ? new Date(row['TANGGAL BERANGKAT']).toLocaleDateString('id-ID') : '-';
-            const tglSampai = isArrived ? new Date(row['TANGGAL SAMPAI']).toLocaleDateString('id-ID') : '-';
+            const tBerangkat = row['TANGGAL BERANGKAT'] ? new Date(row['TANGGAL BERANGKAT']).toLocaleDateString('id-ID') : '-';
+            const tSampai = isArrived ? new Date(row['TANGGAL SAMPAI']).toLocaleDateString('id-ID') : '-';
             
-            // Animasi fill (Horizontal untuk Desktop, Vertical untuk Mobile)
-            const fillStyle = isMobile 
-                ? (isArrived ? 'height: 100%;' : 'height: 50%;')
-                : (isArrived ? 'width: 100%;' : 'width: 50%;');
-                
+            const fillStyle = isMobile ? (isArrived ? 'height: 100%;' : 'height: 50%;') : (isArrived ? 'width: 100%;' : 'width: 50%;');
             const step2Class = 'done';
             const step3Class = isArrived ? 'done' : 'active';
-            const truckIcon = isArrived ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-truck css-truck"></i>';
-            const statusBadge = isArrived 
-                ? `<span style="background:#ecfdf5; color:var(--success); padding:4px 10px; border-radius:12px; font-size:12px; font-weight:bold;">Terkirim</span>`
-                : `<span style="background:#fffbeb; color:var(--warning); padding:4px 10px; border-radius:12px; font-size:12px; font-weight:bold;">Di Perjalanan</span>`;
+            const tIcon = isArrived ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-truck fa-bounce"></i>';
 
             container.innerHTML += `
                 <div class="tracking-item">
                     <div class="truck-header">
-                        <strong style="color:var(--primary); font-size:15px;"><i class="fa-solid fa-hashtag"></i> Resi: ${row['NO']} | ${row['ITEM']}</strong>
-                        ${statusBadge}
+                        <strong style="color:var(--primary); font-size:15px;">#${row['NO']} - ${row['ITEM']}</strong>
+                        ${isArrived ? '<span style="background:#ecfdf5; color:var(--success); padding:4px 10px; border-radius:8px; font-size:12px; font-weight:bold;">Terkirim</span>' : '<span style="background:#fffbeb; color:var(--warning); padding:4px 10px; border-radius:8px; font-size:12px; font-weight:bold;">OTW</span>'}
                     </div>
-                    <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--text-muted); margin-bottom:5px;">
+                    <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted); margin-bottom:5px;">
                         <div><i class="fa-solid fa-user-tie"></i> ${row['NAMA PENGEMUDI']}</div>
-                        <div><i class="fa-solid fa-car-side"></i> <b>${row['PLAT KENDARAAN']}</b></div>
-                        <div><i class="fa-solid fa-cubes"></i> <b>${row['JUMLAH']} ${row['SATUAN']}</b></div>
+                        <div><i class="fa-solid fa-car"></i> <b>${row['PLAT KENDARAAN']}</b></div>
+                        <div><i class="fa-solid fa-cube"></i> <b>${row['JUMLAH']} ${row['SATUAN']}</b></div>
                     </div>
-                    
                     <div class="progress-container">
                         <div class="progress-line"></div>
                         <div class="progress-line-fill" style="${fillStyle}"></div>
-                        
-                        <div class="step done">
-                            <div class="step-icon"><i class="fa-solid fa-box-open"></i></div>
-                            <div class="step-text">Dimuat</div>
-                        </div>
-                        <div class="step ${step2Class}">
-                            <div class="step-icon"><i class="fa-solid fa-road"></i></div>
-                            <div class="step-text">${tglBerangkat}</div>
-                        </div>
-                        <div class="step ${step3Class}">
-                            <div class="step-icon">${truckIcon}</div>
-                            <div class="step-text">${isArrived ? tglSampai : 'Onsite'}</div>
-                        </div>
+                        <div class="step done"><div class="step-icon"><i class="fa-solid fa-box"></i></div><div style="font-size:11px; color:#64748b; font-weight:bold;">Muat</div></div>
+                        <div class="step ${step2Class}"><div class="step-icon"><i class="fa-solid fa-road"></i></div><div style="font-size:11px; color:#64748b; font-weight:bold;">${tBerangkat}</div></div>
+                        <div class="step ${step3Class}"><div class="step-icon" style="background:${isArrived?'var(--success)':'var(--primary)'}; color:white;">${tIcon}</div><div style="font-size:11px; color:#64748b; font-weight:bold;">${isArrived ? tSampai : 'Onsite'}</div></div>
                     </div>
                 </div>
             `;
         });
-        
-        // Trigger reflow untuk animasi progress bar
-        setTimeout(() => {
-            document.querySelectorAll('.progress-line-fill').forEach(el => {
-                if(el.style.width === '0px' || el.style.height === '0px'){
-                    // animasi CSS akan handle via transition
-                }
-            });
-        }, 100);
     }
 
     function populateDropdowns() {
-        const selSampai = document.getElementById('selResiSampai');
-        const selEdit = document.getElementById('selResiEdit');
-        
-        selSampai.innerHTML = '<option value="">-- Pilih Truk Menuju Site --</option>';
-        selEdit.innerHTML = '<option value="">-- Pilih Resi Untuk Diedit --</option>';
+        const selS = document.getElementById('selResiSampai');
+        const selE = document.getElementById('selResiEdit');
+        selS.innerHTML = '<option value="">-- Pilih Truk (Status OTW) --</option>';
+        selE.innerHTML = '<option value="">-- Pilih Resi Untuk Edit --</option>';
         
         dataPengiriman.forEach(row => {
             if(!row['NO']) return;
-            const label = `Resi #${row['NO']} - Plat ${row['PLAT KENDARAAN']}`;
-            
-            // Dropdown Sampai: Hanya yang belum sampai
-            if(row['TANGGAL SAMPAI'] === "") {
-                selSampai.innerHTML += `<option value="${row['NO']}">${label}</option>`;
-            }
-            // Dropdown Edit: Semua resi bisa diedit
-            selEdit.innerHTML += `<option value="${row['NO']}">${label}</option>`;
+            let text = `${row['NO']} - ${row['PLAT KENDARAAN']} (${row['JUMLAH']} ${row['SATUAN']})`;
+            if(row['TANGGAL SAMPAI'] === "") selS.innerHTML += `<option value="${row['NO']}">${text}</option>`;
+            selE.innerHTML += `<option value="${row['NO']}">${text}</option>`;
         });
     }
 
-    function switchTab(tabId, el) {
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
+    // Modal Control
+    function openModal() { document.getElementById('addModal').classList.add('active'); }
+    function closeModal() { document.getElementById('addModal').classList.remove('active'); }
+    function switchTab(t, el) {
+        document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
+        document.getElementById(t).classList.add('active');
         el.classList.add('active');
     }
 
     function loadEditForm() {
-        const no = document.getElementById('selResiEdit').value;
-        const row = dataPengiriman.find(r => r['NO'] == no);
-        if(row) {
-            document.getElementById('editNo').value = row['NO'];
-            document.getElementById('editJumlah').value = row['JUMLAH'];
-            document.getElementById('editSatuan').value = row['SATUAN'];
-            document.getElementById('editPlat').value = row['PLAT KENDARAAN'];
+        let r = dataPengiriman.find(x => x['NO'] == document.getElementById('selResiEdit').value);
+        if(r) {
+            document.getElementById('edNo').value = r['NO'];
+            document.getElementById('edJml').value = r['JUMLAH'];
+            document.getElementById('edSat').value = r['SATUAN'];
+            document.getElementById('edPlat').value = r['PLAT KENDARAAN'];
         }
     }
 
-    async function sendData(payload, btnId, loadingText, defaultText) {
-        const btn = document.getElementById(btnId);
-        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${loadingText}...`;
-        btn.disabled = true;
-        
+    async function reqApi(payload, btnId, lText, oText) {
+        let btn = document.getElementById(btnId);
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${lText}...`; btn.disabled = true;
         try {
-            await fetch(API_URL, {
-                method: 'POST',
-                body: JSON.stringify(payload),
-                headers: { "Content-Type": "text/plain;charset=utf-8" }
-            });
-            alert("Berhasil disimpan!");
-            await init(); // Reload otomatis
-        } catch(e) {
-            alert("Terjadi kesalahan jaringan.");
-        }
-        
-        btn.innerHTML = defaultText;
-        btn.disabled = false;
+            await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload), headers: { "Content-Type": "text/plain;charset=utf-8" } });
+            alert("Berhasil!"); await init(); 
+        } catch(e) { alert("Error Server!"); }
+        btn.innerHTML = oText; btn.disabled = false;
     }
 
     function updateSampai() {
-        const no = document.getElementById('selResiSampai').value;
-        const tgl = document.getElementById('inTglSampai').value;
+        let no = document.getElementById('selResiSampai').value, tgl = document.getElementById('inTglSampai').value;
         if(!no || !tgl) return alert("Pilih Resi dan Tanggal!");
-        
-        sendData({ action: 'update_sampai', no: no, tanggal_sampai: tgl }, 
-                 'btnSampai', 'Mengupdate', '<i class="fa-solid fa-location-dot"></i> Tandai Barang Sampai');
+        reqApi({action:'update_sampai', no:no, tanggal_sampai:tgl}, 'btnSampai', 'Loading', '<i class="fa-solid fa-check"></i> Tandai Barang Sampai');
     }
 
     function simpanEdit() {
-        const noLama = document.getElementById('selResiEdit').value;
-        if(!noLama) return alert("Pilih resi yang mau diedit!");
+        let lama = document.getElementById('selResiEdit').value;
+        if(!lama) return alert("Pilih resi!");
+        reqApi({
+            action: 'edit_resi', no_lama: lama, 
+            no_baru: document.getElementById('edNo').value,
+            jumlah: document.getElementById('edJml').value,
+            satuan: document.getElementById('edSat').value,
+            plat: document.getElementById('edPlat').value
+        }, 'btnEdit', 'Menyimpan', '<i class="fa-solid fa-pen"></i> Simpan Perubahan');
+    }
+
+    // Fungsi Tambah Baru dari Modal
+    function submitPengirimanBaru() {
+        let no = document.getElementById('addNo').value;
+        if(!no) return alert("No Resi / DO Wajib Diisi!");
         
-        const payload = {
-            action: 'edit_resi',
-            no_lama: noLama,
-            no_baru: document.getElementById('editNo').value,
-            jumlah: document.getElementById('editJumlah').value,
-            satuan: document.getElementById('editSatuan').value,
-            plat: document.getElementById('editPlat').value
+        let payload = {
+            action: 'tambah_resi',
+            no: no,
+            tgl_berangkat: document.getElementById('addTgl').value,
+            item: document.getElementById('addItem').value,
+            mutu: document.getElementById('addMutu').value,
+            jumlah: document.getElementById('addJumlah').value,
+            satuan: document.getElementById('addSatuan').value,
+            pengemudi: document.getElementById('addSopir').value,
+            plat: document.getElementById('addPlat').value
         };
-        sendData(payload, 'btnEdit', 'Menyimpan', '<i class="fa-solid fa-pen-to-square"></i> Simpan Perubahan');
+
+        reqApi(payload, 'btnAddSubmit', 'Menyimpan', '<i class="fa-solid fa-paper-plane"></i> Kirim Data & Simpan').then(() => {
+            closeModal(); // Tutup modal jika sukses
+            // Reset form
+            document.querySelectorAll('#addModal input').forEach(inp => inp.value = '');
+        });
     }
 
     function shareWhatsApp() {
-        let text = `*📊 LAPORAN MATERIAL ONSITE*\nTanggal: ${new Date().toLocaleDateString('id-ID')}\n\n`;
-        text += `*REKAPITULASI TARGET & SISA:*\n`;
-        
-        for(let unit in globalStats) {
-            text += `🔹 *Satuan: ${unit.toUpperCase()}*\n`;
-            text += `   - Target: ${globalStats[unit].target.toLocaleString('id-ID')} ${unit}\n`;
-            text += `   - Sampai: ${globalStats[unit].terkumpul.toLocaleString('id-ID')} ${unit}\n`;
-            text += `   - Sisa  : ${globalStats[unit].sisa.toLocaleString('id-ID')} ${unit}\n\n`;
+        let text = `*🚧 REPORT LOGISTIK ONSITE*\nTanggal: ${new Date().toLocaleDateString('id-ID')}\n\n`;
+        text += `*📊 STATUS PESANAN:*\n`;
+        for(let u in globalStats) {
+            let s = globalStats[u];
+            text += `*Satuan: ${u.toUpperCase()}*\n`;
+            text += ` 🎯 Target : ${s.target.toLocaleString('id-ID')} ${u}\n`;
+            text += ` ✅ Sampai : ${s.sampai.toLocaleString('id-ID')} ${u}\n`;
+            text += ` 🚚 OTW    : ${s.otw.toLocaleString('id-ID')} ${u}\n`;
+            text += ` ⏳ SISA   : ${s.sisa.toLocaleString('id-ID')} ${u}\n\n`;
         }
-
-        text += `🚚 *SEDANG DI PERJALANAN (OTW):*\n`;
-        let countOtw = 0;
-        dataPengiriman.forEach(row => {
-            if(row['NO'] && row['TANGGAL SAMPAI'] === "") {
-                text += `- Resi #${row['NO']} | ${row['PLAT KENDARAAN']} (${row['JUMLAH']} ${row['SATUAN']})\n`;
-                countOtw++;
-            }
-        });
-        if(countOtw === 0) text += `- _Semua barang sudah sampai onsite._\n`;
-
         window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
     }
 
-    // Refresh layout jika ukuran browser diganti (Desktop <-> HP)
     window.addEventListener('resize', renderTrackingUI);
     window.onload = init;
 </script>
