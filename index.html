@@ -1,587 +1,143 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MaterialTrack - Diagram Edition</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --bg-color: #f1f5f9; --card-bg: rgba(255, 255, 255, 0.98);
-            --primary: #2563eb; --primary-hover: #1d4ed8;
-            --success: #10b981; --warning: #f59e0b; --danger: #ef4444; --purple: #8b5cf6;
-            --text-main: #0f172a; --text-muted: #64748b;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif; background-color: var(--bg-color);
-            margin: 0; padding: 20px; color: var(--text-main);
-            background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 20px 20px;
-        }
-        .container { max-width: 1400px; margin: 0 auto; }
-
-        /* Navbar & Button Action */
-        .navbar { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 15px 30px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 20px; flex-wrap: wrap; gap: 15px;}
-        .navbar .logo { font-size: 22px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 10px; }
-        
-        .nav-actions { display: flex; gap: 10px; flex-wrap: wrap;}
-        .btn-add { color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 8px; font-size: 13px;}
-        .btn-add:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
-        .btn-blue { background: var(--primary); }
-        .btn-purple { background: var(--purple); }
-        .btn-green { background: var(--success); }
-
-        /* General Stats Grid (Overview) */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 25px; }
-        .stat-card { background: var(--card-bg); padding: 18px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 15px; }
-        .stat-icon { width: 55px; height: 55px; border-radius: 14px; display: flex; justify-content: center; align-items: center; font-size: 24px; flex-shrink: 0;}
-        .bg-blue { background: #eff6ff; color: var(--primary); }
-        .bg-green { background: #ecfdf5; color: var(--success); }
-        .bg-yellow { background: #fffbeb; color: var(--warning); }
-        .bg-purple { background: #faf5ff; color: var(--purple); }
-        
-        .stat-info h3 { margin: 0; font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom:5px;}
-        .stat-list { font-size: 26px; font-weight: 800; color: var(--text-main); }
-
-        /* MAP UI */
-        .map-section { background: #0f172a; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); margin-bottom: 25px; position: relative; overflow: hidden; }
-        .map-header { font-weight: 700; margin-bottom: 20px; color: #f8fafc; display: flex; justify-content: space-between; align-items: center; font-size: 16px; }
-        .map-container { position: relative; height: 120px; background: #1e293b; border-radius: 16px; border: 1px solid #334155; display: flex; align-items: center; }
-        .map-node { position: absolute; width: 70px; height: 70px; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 5; font-size: 11px; font-weight: 700; color: white; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-        .node-supplier { left: 30px; background: linear-gradient(135deg, #3b82f6, #1e3a8a); border: 2px solid #60a5fa; box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
-        .node-site { right: 30px; background: linear-gradient(135deg, #10b981, #064e3b); border: 2px solid #34d399; box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
-        .map-route { position: absolute; left: 100px; right: 100px; height: 3px; background: rgba(255,255,255,0.05); }
-        .map-route-dash { width: 100%; height: 100%; background: repeating-linear-gradient(90deg, #3b82f6 0, #3b82f6 10px, transparent 10px, transparent 20px); animation: moveRoute 1s linear infinite; }
-        @keyframes moveRoute { from { background-position: 0 0; } to { background-position: -20px 0; } }
-
-        .modern-truck { position: absolute; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 8px; z-index: 10; }
-        .truck-icon { background: #1e293b; color: #60a5fa; padding: 8px; border-radius: 50%; border: 2px solid #3b82f6; box-shadow: 0 0 15px rgba(59,130,246,0.5); }
-        .truck-label { background: rgba(15, 23, 42, 0.85); color: #f8fafc; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; border: 1px solid #334155; backdrop-filter: blur(4px); white-space: nowrap; }
-        .truck-otw { animation: modernDrive 8s linear infinite; }
-        @keyframes modernDrive { 0% { left: 2%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { left: 90%; opacity: 0; } }
-
-        /* Layout & Panel */
-        .main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 25px; }
-        .panel { background: var(--card-bg); border-radius: 16px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        .tracking-panel { max-height: 60vh; overflow-y: auto; }
-        .tracking-item { border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 15px; background:#fff;}
-        .truck-header { display: flex; justify-content: space-between; border-bottom: 1px dashed #cbd5e1; padding-bottom: 12px; margin-bottom: 12px;}
-        
-        /* Modals & Diagram UI */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 9999; }
-        .modal-overlay.active { display: flex; animation: fadeIn 0.2s; }
-        .modal-content { background: white; width: 100%; max-width: 500px; padding: 30px; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;}
-        
-        /* Modal Lebar Khusus Diagram */
-        .modal-large { max-width: 800px; }
-
-        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 20px;}
-        .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #94a3b8; }
-        
-        /* Modern Progress Diagram Cards */
-        .diag-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 15px; transition: 0.3s;}
-        .diag-item:hover { border-color: #cbd5e1; box-shadow: 0 5px 15px rgba(0,0,0,0.05);}
-        .diag-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: 700; color: #0f172a; font-size: 15px;}
-        
-        .diag-bar-bg { width: 100%; height: 12px; background: #e2e8f0; border-radius: 6px; overflow: hidden; display: flex; margin-bottom: 12px;}
-        .diag-fill-sampai { height: 100%; background: var(--success); transition: 1s ease-out;}
-        .diag-fill-otw { height: 100%; background: var(--warning); transition: 1s ease-out;}
-        
-        .diag-stats { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600;}
-        .d-box { padding: 6px 12px; border-radius: 6px; border: 1px solid #e2e8f0; display:flex; flex-direction:column; align-items:center; flex:1; margin:0 5px;}
-        .d-box span { font-size: 10px; color: #64748b; text-transform: uppercase; margin-bottom: 3px;}
-        .d-target { background: #eff6ff; color: var(--primary); border-color: #bfdbfe;}
-        .d-sampai { background: #ecfdf5; color: var(--success); border-color: #a7f3d0;}
-        .d-otw { background: #fffbeb; color: var(--warning); border-color: #fde68a;}
-        .d-sisa { background: #faf5ff; color: var(--purple); border-color: #e9d5ff;}
-
-        label { font-size: 13px; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 5px; }
-        input, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 8px; background:#f8fafc; box-sizing: border-box;}
-        .form-row { display: flex; gap: 15px; }
-        button.action-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition:0.3s; margin-bottom:10px;}
-        .btn-whatsapp { background: #25D366; color: white; margin-top:20px; }
-
-        @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-        
-        .tabs { display: flex; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; }
-        .tab-btn { background: none; border: none; padding: 10px 15px; font-weight: 600; color: #64748b; cursor: pointer; }
-        .tab-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s; }
-
-        @media (max-width: 900px) {
-            .main-grid { grid-template-columns: 1fr; }
-            .diag-stats { flex-wrap: wrap; }
-            .d-box { min-width: 40%; margin-bottom: 10px; }
-        }
-    </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="MaterialTrack — kendalikan pengiriman, pantau lokasi, dan lihat pemenuhan material dalam satu dashboard.">
+<title>MaterialTrack • Kontrol Pengiriman</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{--bg:#f4f6f5;--paper:#fff;--ink:#182c28;--muted:#778581;--line:#e5ebe8;--green:#137b5b;--dark:#102e26;--mint:#e9f5ee;--amber:#ac7316;--radius:17px}*{box-sizing:border-box}body{margin:0;font:14px 'DM Sans',system-ui,sans-serif;color:var(--ink);background:var(--bg)}button,input,select,textarea{font:inherit}button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}button,a{touch-action:manipulation}button{cursor:pointer}button:disabled{opacity:.5;cursor:wait}button:focus-visible,a:focus-visible{outline:3px solid #35ba93;outline-offset:3px}a{color:var(--green)}h1,h2,h3,p{margin:0}h1,h2,h3,.number,.brand{font-family:Manrope,system-ui,sans-serif}h2{font-size:16px;letter-spacing:-.3px}h3{font-size:15px}.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;vertical-align:middle}.sprite{position:absolute;width:0;height:0;overflow:hidden}.sidebar{width:222px;position:fixed;inset:0 auto 0 0;background:var(--dark);color:#bbcfc7;padding:30px 18px;display:flex;flex-direction:column;z-index:500}.brand{display:flex;align-items:center;gap:11px;font-size:19px;font-weight:800;color:white;padding:0 9px}.brand-mark{display:grid;place-items:center;background:#b9ef78;border-radius:11px;width:37px;height:39px;color:#173d2e}.brand-mark .icon{width:25px;height:25px;stroke-width:2}.brand sub{font:8px 'DM Sans';letter-spacing:1.1px;color:#b9ef78;display:block;position:static;margin-top:3px}.side-caption{margin:46px 15px 15px;font-size:10px;letter-spacing:1.6px;color:#6e9987}.nav{display:flex;flex-direction:column;gap:7px}.nav button{display:flex;align-items:center;gap:13px;padding:14px;border:0;border-radius:10px;background:transparent;color:#a8c3b8;text-align:left;font-weight:500}.nav button.active{background:#244d3f;color:#d8fdb9}.nav button:hover{background:#1e4437}.nav .count{margin-left:auto;border-radius:5px;background:#315e48;color:#d8fdb9;padding:1px 6px;font-size:11px}.side-bottom{margin-top:auto}.side-note{margin:26px 9px;padding:18px 0;border-top:1px solid #315044;font-size:12px;line-height:1.7;color:#8baa9c}.side-note b{display:block;color:#cee3d8;font-size:13px;margin-bottom:4px}.profile{display:flex;align-items:center;gap:10px;padding:10px 8px}.avatar{width:33px;height:33px;border-radius:50%;background:#315145;display:grid;place-items:center;color:#d8fdb9;font-weight:600;font-size:11px}.profile b{color:white;font-size:12px}.profile small{display:block;font-size:10px;color:#8eafa0;margin-top:3px}.workspace{margin-left:222px}.topbar{height:76px;padding:0 34px;border-bottom:1px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px}.breadcrumb{font-size:12px;color:var(--muted)}.breadcrumb span{color:var(--ink);margin-left:9px}.top-actions{display:flex;align-items:center;gap:17px}.connection{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted)}.dot{width:6px;height:6px;display:inline-block;border-radius:50%;background:#29a477}.dot.amber{background:#d2a044}.dot.red{background:#cf6a4c}.icon-btn{border:1px solid var(--line);background:#fff;border-radius:9px;width:35px;height:35px;display:inline-grid;place-items:center;color:#566d64}.icon-btn:hover{background:var(--mint)}.content{padding:29px 34px 36px;max-width:1700px;margin:auto}.page-head{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:24px}h1{font-size:27px;letter-spacing:-1px;font-weight:800}.subtitle{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}.buttons{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border:1px solid var(--line);border-radius:9px;color:#324b40;background:white;font-size:12px;font-weight:600;text-decoration:none;min-height:39px}.btn:hover{background:#f0f5f2}.btn .icon{width:16px;height:16px}.btn.primary{background:var(--green);border-color:var(--green);color:white}.btn.primary:hover{background:#09694b}.btn.dark{background:var(--dark);border-color:var(--dark);color:white}.btn.small{padding:6px 11px;min-height:31px;font-size:11px}.btn.wide{width:100%}.btn.danger{color:#b34839}.mode-banner{border:1px solid #dce8dd;background:#edf4e9;border-radius:10px;padding:11px 15px;margin-bottom:23px;display:flex;gap:12px;justify-content:space-between;align-items:center;font-size:11px;color:#52744f;line-height:1.5}.mode-banner b{color:#345a32}.mode-banner button{border:0;background:none;color:#376333;font-size:11px;font-weight:700;white-space:nowrap}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:24px}.stat{padding:20px;background:white;border:1px solid var(--line);border-radius:var(--radius);position:relative;overflow:hidden}.stat-label{font-size:11px;color:#71817a;display:flex;align-items:center;justify-content:space-between}.stat-label .icon{width:19px;height:19px;color:#6b9280}.stat .number{font-size:32px;font-weight:800;letter-spacing:-1px;margin:11px 0 8px;line-height:1.2}.stat small{font-size:10px;color:#94a099}.stat.focus{background:var(--dark);color:white;border-color:var(--dark)}.stat.focus .stat-label,.stat.focus .stat-label .icon{color:#bad0c3}.stat.focus small{color:#bed6c9}.stat.focus:after{content:'';position:absolute;width:100px;height:100px;right:-22px;bottom:-32px;border:17px solid #234b3b;border-radius:50%}.stat.warn .number{color:var(--amber)}.section-head{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:15px}.section-head p{font-size:11px;color:var(--muted);margin-top:5px}.tag{display:inline-flex;align-items:center;gap:5px;border-radius:6px;padding:4px 7px;font-size:10px;font-weight:600;background:#edf6f0;color:#2c8056;white-space:nowrap}.tag.amber{color:#976b23;background:#fbf3e3}.tag.gray{color:#7c8983;background:#f0f3f1}.tag.red{background:#fbeee7;color:#b16e42}.tracking-layout{display:grid;grid-template-columns:minmax(0,1fr) 306px;gap:18px;margin-bottom:23px}.map-card{border-radius:var(--radius);border:1px solid var(--line);overflow:hidden;background:white;min-width:0}.map-top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:15px 18px;border-bottom:1px solid var(--line)}.map-top b{font-size:12px}.map-top .buttons{gap:6px}.map-wrap{position:relative;height:362px;background:#e7eeea;isolation:isolate}.map-canvas{height:100%;width:100%;z-index:1;background:#e7eeea}.map-fallback{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#6d8377;text-align:center;padding:35px;background:linear-gradient(125deg,#eaf2ed,#dfebe8);font-size:12px;line-height:1.9;z-index:0}.map-fallback .icon{width:38px;height:38px;margin-bottom:12px}.map-overlay{position:absolute;z-index:400;background:#fffefb;box-shadow:0 3px 14px #233f2110;border:1px solid #e0e8dc;border-radius:9px;padding:9px 12px;font-size:10px;left:16px;bottom:24px;max-width:calc(100% - 76px);line-height:1.5}.map-status{position:absolute;top:14px;left:14px;z-index:400;background:#fffefb;box-shadow:0 3px 14px #233f2110;border-radius:8px;max-width:80%;padding:9px 12px;font-size:11px;line-height:1.5}.map-status strong{display:block;font-size:12px;margin-bottom:3px}.map-legend{display:flex;align-items:center;gap:18px;padding:12px 18px;font-size:10px;color:var(--muted);flex-wrap:wrap}.map-legend span{display:flex;align-items:center;gap:6px}.legend-line{width:17px;border-top:2px solid #148864}.legend-dash{width:17px;border-top:2px dashed #879b8c}.legend-pin{width:7px;height:7px;border-radius:50%;background:#137b5b}.truck-marker{background:transparent;border:0}.truck-bubble{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:white;border:2px solid #1c8565;box-shadow:0 3px 13px #164d3040;color:#177757}.truck-bubble.selected{background:#167f5c;color:white;box-shadow:0 0 0 6px #17866020,0 3px 13px #164d3040}.truck-bubble.stale{border-color:#b89860;color:#967230;background:white}.truck-bubble .icon{width:23px;height:23px}.truck-marker-label{display:block;position:absolute;top:40px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:700;background:white;border:1px solid #dfebe3;box-shadow:0 2px 4px #183d2310;border-radius:5px;padding:3px 6px;white-space:nowrap;color:#1b4f3b}.leaflet-tooltip{font:11px 'DM Sans',sans-serif}.leaflet-container{font-family:'DM Sans',sans-serif}.leaflet-control-attribution{font-size:9px!important}.endpoint{width:15px;height:15px;background:#102e26;border:3px solid white;border-radius:50%;box-shadow:0 0 0 1px #325446}.detail{padding:19px;border:1px solid var(--line);border-radius:var(--radius);background:white;min-width:0}.detail-label{font-size:10px;letter-spacing:1px;color:#8a9790;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.detail select{font-size:12px;background:#f7f9f7;padding:10px;border:1px solid var(--line);border-radius:8px;width:100%;margin-bottom:14px;color:var(--ink)}.vehicle{display:flex;align-items:center;gap:12px;margin-bottom:15px}.vehicle-icon{width:43px;height:43px;border-radius:12px;background:#eaf5ec;display:grid;place-items:center;color:#2d8057}.vehicle h3{font-size:17px;letter-spacing:-.5px}.vehicle p{font-size:10px;color:var(--muted);margin-top:4px}.detail-info{border-top:1px solid var(--line);border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:13px 0;margin:12px 0}.detail-info span{font-size:9px;color:var(--muted);display:block;margin-bottom:5px}.detail-info b{font-size:11px;font-weight:600;display:block;word-break:break-word}.journey{padding:4px 0 4px 9px;margin-bottom:8px}.journey-step{position:relative;padding:0 0 17px 20px;border-left:1px dashed #cadbd0;font-size:11px}.journey-step:last-child{border:0;padding-bottom:0}.journey-step:before{position:absolute;content:'';width:8px;height:8px;left:-5px;top:2px;background:#b5cabc;border:2px solid white;border-radius:50%;box-shadow:0 0 0 1px #b5cabc}.journey-step.current:before{background:var(--green);box-shadow:0 0 0 3px #def0e4}.journey-step small{display:block;color:var(--muted);font-size:10px;margin-top:4px;line-height:1.5}.detail-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:17px}.detail .note{font-size:10px;line-height:1.6;margin-top:10px;color:#89988f}.lower-grid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:18px;align-items:start}.panel{background:white;border-radius:var(--radius);border:1px solid var(--line);overflow:hidden;min-width:0}.panel-title{padding:19px 20px 15px;display:flex;align-items:center;justify-content:space-between;gap:8px}.panel-title small{display:block;font-size:10px;color:var(--muted);margin-top:5px}.panel-title .icon{width:17px;height:17px}.text-btn{border:0;background:none;color:var(--green);font-size:11px;font-weight:600;padding:5px}.table-tools{padding:0 20px 13px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.tabs{display:flex;gap:4px;background:#f5f7f5;border:1px solid var(--line);border-radius:8px;padding:3px}.tabs button{border:0;border-radius:5px;background:none;color:#88938d;font-size:10px;padding:6px 9px;white-space:nowrap}.tabs button.active{background:white;color:var(--ink);box-shadow:0 1px 4px #14312014}.search{display:flex;align-items:center;gap:8px;margin-left:auto;border:1px solid var(--line);padding:7px 10px;border-radius:8px;flex:1;min-width:130px;max-width:215px}.search .icon{width:14px;height:14px;color:var(--muted)}.search input{border:0;outline:0;min-width:0;width:100%;font-size:10px;background:transparent}.table-scroll{overflow:auto}table{border-collapse:collapse;width:100%;text-align:left;white-space:nowrap}th{background:#fafbf9;color:#99a39d;font-weight:500;font-size:9px;letter-spacing:.4px;padding:12px 16px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}td{padding:15px 16px;border-bottom:1px solid #edf1ed;font-size:11px}td b{font-size:11px;display:block;margin-bottom:4px;font-weight:600}td small{color:#8e9b93;font-size:9px}tbody tr{cursor:pointer}tbody tr:hover{background:#f5faf5}tbody tr.selected{background:#f4faf5}.table-footer{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;font-size:10px;color:#8d9991}.pagination{display:flex;align-items:center;gap:7px}.pagination button{border:1px solid var(--line);background:white;border-radius:6px;padding:4px 9px;color:#6d7e73}.material-list{padding:0 20px 16px}.material-item{padding:16px 0;border-bottom:1px solid #edf1ec}.material-item:last-child{border:0}.material-head{display:flex;justify-content:space-between;gap:10px;font-size:11px;margin-bottom:8px}.material-head b{font-weight:600}.material-head span{font-size:10px;color:var(--green);font-weight:700}.progress{display:flex;height:6px;border-radius:4px;overflow:hidden;background:#eef2ed;margin-bottom:8px}.progress .arrived{background:#26865e}.progress .otw{background:#c5db9b}.material-count{display:flex;justify-content:space-between;font-size:9px;color:#8f9c93;gap:5px;flex-wrap:wrap;line-height:1.6}.material-count strong{color:#496c55;font-weight:500}.material-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:12px}.material-meta b{font-size:13px}.material-meta span{display:block;color:var(--muted);font-size:10px;margin-bottom:4px}.material-foot{border-top:1px solid var(--line);padding:13px 20px;background:#fcfdfb;font-size:10px;display:flex;gap:12px;color:#829184;flex-wrap:wrap}.material-foot span{display:flex;gap:5px;align-items:center}.small-dot{width:6px;height:6px;display:inline-block;border-radius:2px;background:#26865e}.small-dot.light{background:#c5db9b}.empty{padding:30px;text-align:center;font-size:12px;color:var(--muted);line-height:1.7}.settings-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px}.settings-card{padding:24px;background:white;border:1px solid var(--line);border-radius:var(--radius)}.settings-card h2{margin-bottom:8px}.settings-card p,.settings-card li{font-size:12px;line-height:1.9;color:#7b8b80}.settings-card ul{padding-left:17px}.settings-card .btn{margin-top:14px}footer{margin-top:23px;display:flex;justify-content:space-between;gap:10px;font-size:10px;color:#9aa69d}.view{display:none}.view.active{display:block}.view[data-view="shipments"] .lower-grid{grid-template-columns:1fr}.view[data-view="materials"] .material-list{display:grid;grid-template-columns:1fr 1fr;gap:20px}.view[data-view="materials"] .material-item{border:1px solid var(--line);border-radius:12px;padding:20px}.mobile-menu{display:none}dialog{padding:0;border:1px solid #e3eae4;border-radius:18px;width:580px;max-width:calc(100vw - 24px);max-height:88vh;box-shadow:0 20px 80px #102e2633;color:var(--ink)}dialog::backdrop{background:#142d265c;backdrop-filter:blur(3px)}.dialog-head{padding:20px 23px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:white;z-index:1}.dialog-head h2{font-size:17px}.dialog-body{padding:20px 23px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:15px}.field{display:block;font-size:11px;color:#718478;line-height:1.5}.field.full{grid-column:1/-1}.field input,.field select,.field textarea{width:100%;margin-top:6px;border:1px solid #dce6de;border-radius:8px;background:#fbfcfa;padding:11px;color:var(--ink);font-size:13px;outline:0}.field textarea{min-height:74px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:#389d71;box-shadow:0 0 0 3px #e9f5e9}.field small{display:block;font-size:10px;margin-top:5px;color:#93a095}.form-note{border-radius:8px;background:#f3f7ef;color:#6b8262;padding:12px;font-size:11px;line-height:1.8;margin-bottom:17px}.form-error{font-size:12px;color:#b24a35;line-height:1.6;background:#fff2ed;border-radius:8px;padding:10px 12px;margin:15px 0 0}.dialog-footer{padding:15px 23px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}.advanced{margin-top:18px;border-top:1px solid var(--line);padding-top:16px}.advanced summary{cursor:pointer;font-size:12px;margin-bottom:15px;color:#687e6c}.toasts{position:fixed;bottom:24px;right:24px;z-index:10000;max-width:min(390px,90vw)}.toast{border:1px solid #c3dac8;background:#fff;color:#244d34;border-radius:11px;padding:14px 18px;box-shadow:0 7px 35px #18352217;font-size:12px;line-height:1.6;margin-top:8px}.toast.error{border-color:#eac9bc;color:#a25239}.link-output{width:100%;padding:12px;border:1px solid var(--line);background:#f4f8f2;border-radius:8px;font-size:12px;word-break:break-all}.report-text{width:100%;min-height:240px;font-size:12px;line-height:1.8;padding:12px;border:1px solid var(--line);border-radius:8px;resize:vertical}.hidden{display:none!important}.pulse{animation:pulse 2s infinite}@keyframes pulse{50%{opacity:.35}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}@media(min-width:1550px){.map-wrap{height:405px}.tracking-layout{grid-template-columns:minmax(0,1fr) 330px}.lower-grid{grid-template-columns:minmax(0,1fr) 365px}}@media(max-width:1190px){.sidebar{width:190px;padding-left:12px;padding-right:12px}.brand{font-size:17px;gap:8px;padding:0 4px}.workspace{margin-left:190px}.topbar{padding:0 23px}.content{padding:23px}.tracking-layout{grid-template-columns:minmax(0,1fr) 280px;gap:14px}.lower-grid{grid-template-columns:1fr}.stats{gap:12px}.stat{padding:16px}.page-head{align-items:flex-start}h1{font-size:25px}.material-list{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.material-item{border-bottom:0}.map-wrap{height:370px}}@media(max-width:900px){.sidebar{width:74px;padding:25px 10px}.brand{padding:0;justify-content:center}.brand-text,.side-caption,.nav span,.side-note,.profile{display:none}.nav{margin-top:40px}.nav button{justify-content:center;padding:14px 5px}.nav .count{display:none}.workspace{margin-left:74px}.tracking-layout{grid-template-columns:minmax(0,1fr) 265px}.top-actions{gap:10px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stat{padding:17px}.stat .number{font-size:28px}.settings-grid{grid-template-columns:1fr}.page-head{flex-wrap:wrap}.material-list{grid-template-columns:1fr 1fr}}@media(max-width:680px){.sidebar{width:210px;transform:translateX(-100%);transition:transform .2s;padding:25px 15px;box-shadow:15px 0 60px #0f2d2630}.sidebar.open{transform:translateX(0)}.sidebar.open .brand-text,.sidebar.open .side-caption,.sidebar.open .nav span,.sidebar.open .side-note,.sidebar.open .profile{display:block}.sidebar.open .profile{display:flex}.sidebar.open .nav{margin-top:0}.sidebar.open .nav button{justify-content:flex-start;padding:14px}.sidebar.open .brand{justify-content:flex-start}.workspace{margin-left:0}.topbar{height:62px;padding:0 17px;position:sticky;top:0;z-index:450}.mobile-menu{display:grid}.top-actions .connection{font-size:10px}.breadcrumb{display:none}.content{padding:21px 16px}.page-head{margin-bottom:19px;gap:16px}.page-head .buttons{width:100%}.page-head .buttons .btn{flex:1}.mode-banner{font-size:10px;padding:10px 12px;gap:7px;margin-bottom:18px}.mode-banner button{font-size:10px}.stats{gap:10px;margin-bottom:21px}.stat-label{font-size:10px}.stat .number{font-size:28px;margin:8px 0}.stat{padding:15px}.stat small{font-size:9px}.tracking-layout{grid-template-columns:1fr}.map-wrap{height:350px}.map-top{padding:13px}.map-top b{font-size:11px}.map-top .btn{font-size:10px;padding:5px 8px}.detail{padding:17px}.detail-info{grid-template-columns:repeat(4,minmax(0,1fr))}.journey{display:flex;gap:13px}.journey-step{flex:1;padding-bottom:4px;border:0}.detail-actions{margin-top:12px}.lower-grid{gap:15px}.material-list{display:block}.material-item{border-bottom:1px solid var(--line)}.table-tools{padding-left:15px;padding-right:15px}.panel-title{padding:17px 15px}.search{max-width:none}.section-head h2{font-size:15px}.section-head p{font-size:10px}.section-head .tag{font-size:9px}footer{font-size:9px;flex-wrap:wrap}.fields{grid-template-columns:1fr 1fr;gap:12px}.dialog-head,.dialog-body{padding:18px}.view[data-view="materials"] .material-list{display:block}.view[data-view="materials"] .material-item{margin-bottom:12px}.material-meta{gap:7px;grid-template-columns:1fr 1fr}}
+</style>
 </head>
 <body>
-
-<div class="container">
-    <div class="navbar">
-        <div class="logo"><i class="fa-solid fa-layer-group"></i> MaterialTrack Pro</div>
-        <div class="nav-actions">
-            <button class="btn-add btn-purple" onclick="openModal('pesananModal')"><i class="fa-solid fa-cart-plus"></i> Target Pesanan</button>
-            <button class="btn-add btn-blue" onclick="openModal('addModal')"><i class="fa-solid fa-truck"></i> Input DO Pengiriman</button>
-        </div>
-    </div>
-
-    <!-- GENERAL OVERVIEW STATS (Tidak membedakan satuan, murni performa logistic) -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon bg-blue"><i class="fa-solid fa-cubes"></i></div>
-            <div class="stat-info">
-                <h3>Jenis Material</h3>
-                <div class="stat-list" id="statJenis">0</div>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon bg-green"><i class="fa-solid fa-flag-checkered"></i></div>
-            <div class="stat-info">
-                <h3>Item Komplit Selesai</h3>
-                <div class="stat-list" id="statSelesai">0</div>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon bg-purple"><i class="fa-solid fa-truck-ramp-box"></i></div>
-            <div class="stat-info">
-                <h3>Total Truk Sampai</h3>
-                <div class="stat-list" id="statTrukSampai">0</div>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon bg-yellow"><i class="fa-solid fa-truck-moving"></i></div>
-            <div class="stat-info">
-                <h3>Truk Sedang OTW</h3>
-                <div class="stat-list" id="statTrukOtw">0</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODERN TOP-DOWN MAP -->
-    <div class="map-section">
-        <div class="map-header">
-            <div><i class="fa-solid fa-satellite-dish fa-beat" style="color: #34d399;"></i> Live Logistic Network</div>
-            <!-- TOMBOL BUKA DIAGRAM -->
-            <button class="btn-add btn-green" onclick="openModal('diagramModal')" style="box-shadow: 0 0 15px rgba(16,185,129,0.4);"><i class="fa-solid fa-chart-pie"></i> Buka Diagram Detail Material</button>
-        </div>
-        <div class="map-container">
-            <div class="map-node node-supplier"><i class="fa-solid fa-industry fa-lg" style="margin-bottom: 4px;"></i> Supplier</div>
-            <div class="map-route"><div class="map-route-dash"></div></div>
-            <div id="modernMapTrucks"></div>
-            <div class="map-node node-site"><i class="fa-solid fa-person-digging fa-lg" style="margin-bottom: 4px;"></i> Onsite</div>
-        </div>
-    </div>
-
-    <!-- Tracking List & Actions -->
-    <div class="main-grid">
-        <div class="panel tracking-panel" id="trackingList">
-            <div style="text-align:center; padding:40px; color:var(--primary);"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><br><br>Sinkronisasi Database...</div>
-        </div>
-
-        <div class="panel">
-            <div class="tabs">
-                <button class="tab-btn active" onclick="switchTab('tab-sampai', this)">Konfirmasi Sampai</button>
-                <button class="tab-btn" onclick="switchTab('tab-edit', this)">Edit Resi</button>
-            </div>
-
-            <div id="tab-sampai" class="tab-content active">
-                <label>Pilih Truk (Resi)</label>
-                <select id="selResiSampai"></select>
-                <label>Tanggal Sampai Onsite</label>
-                <input type="date" id="inTglSampai">
-                <button class="action-btn btn-green" onclick="updateSampai()" id="btnSampai">
-                    <i class="fa-solid fa-check"></i> Tandai Barang Sampai
-                </button>
-            </div>
-
-            <div id="tab-edit" class="tab-content">
-                <label>Pilih Resi Yang Salah</label>
-                <select id="selResiEdit" onchange="loadEditForm()"></select>
-                <div style="background:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom: 10px;">
-                    <label>No Resi</label><input type="text" id="edNo">
-                    <div class="form-row">
-                        <div style="flex:2"><label>Jumlah</label><input type="number" id="edJml" step="0.01"></div>
-                        <div style="flex:1"><label>Satuan</label><input type="text" id="edSat"></div>
-                    </div>
-                    <label>Plat</label><input type="text" id="edPlat">
-                </div>
-                <button class="action-btn" style="background:var(--warning); color:white;" onclick="simpanEdit()" id="btnEdit">
-                    <i class="fa-solid fa-pen"></i> Simpan Perubahan
-                </button>
-            </div>
-
-            <button class="action-btn btn-whatsapp" onclick="shareWhatsApp()">
-                <i class="fa-brands fa-whatsapp fa-lg"></i> Share Laporan WhatsApp
-            </button>
-        </div>
-    </div>
+<svg class="sprite" aria-hidden="true"><defs>
+<symbol id="i-box" viewBox="0 0 24 24"><path d="m12 3 9 5v9l-9 5-9-5V8zM3 8l9 5 9-5M12 13v9M7.5 5.5l9 5"/></symbol>
+<symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+<symbol id="i-truck" viewBox="0 0 24 24"><path d="M3 17H2V5h13v12H8m7-9h4l3 5v4h-2m-5 0h-2m2-4h7"/><circle cx="6" cy="17" r="2.5"/><circle cx="18" cy="17" r="2.5"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+<symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3" fill="currentColor"/><circle cx="16" cy="17" r="3" fill="currentColor"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 7V3m0 4h-4M4 17v4m0-4h4M20 7a9 9 0 0 0-15-2M4 17a9 9 0 0 0 15 2"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 5 5"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m6 12 4 4 8-9"/><circle cx="12" cy="12" r="10"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 15v6h16v-6"/></symbol>
+<symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/></symbol>
+<symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7Z"/></symbol>
+<symbol id="i-edit" viewBox="0 0 24 24"><path d="m15 4 5 5M4 20l5-1L21 7a2 2 0 0 0-4-4L5 15z"/></symbol>
+<symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m9 10 6-4M9 14l6 4"/></symbol>
+</defs></svg>
+<aside class="sidebar" id="sidebar">
+<div class="brand"><div class="brand-mark"><svg class="icon"><use href="#i-box"/></svg></div><div class="brand-text">MaterialTrack<sub>LOGISTICS WORKSPACE</sub></div></div>
+<div class="side-caption">WORKSPACE</div>
+<nav class="nav" aria-label="Menu utama">
+<button class="active" data-nav="overview"><svg class="icon"><use href="#i-grid"/></svg><span>Ringkasan</span></button>
+<button data-nav="shipments"><svg class="icon"><use href="#i-truck"/></svg><span>Pengiriman</span><span class="count" id="navCount">0</span></button>
+<button data-nav="materials"><svg class="icon"><use href="#i-box"/></svg><span>Material</span></button>
+<button data-nav="settings"><svg class="icon"><use href="#i-settings"/></svg><span>Pengaturan</span></button>
+</nav>
+<div class="side-bottom"><div class="side-note"><b>Dari supplier, sampai site.</b>Setiap pengiriman tercatat.<br>Setiap material terpantau.</div><div class="profile"><div class="avatar">MT</div><div><b>Tim Logistik</b><small>MaterialTrack Pro · v2.0</small></div></div></div>
+</aside>
+<div class="workspace">
+<header class="topbar"><button class="icon-btn mobile-menu" id="mobileMenu" aria-label="Buka menu" aria-expanded="false"><svg class="icon"><use href="#i-menu"/></svg></button><div class="breadcrumb">Workspace <span>/ &nbsp; Operasional logistik</span></div><div class="top-actions"><div class="connection" id="connection"><i class="dot amber"></i> Mode demo</div><button class="icon-btn" id="refreshBtn" title="Sinkronisasi sekarang" aria-label="Sinkronisasi sekarang"><svg class="icon"><use href="#i-refresh"/></svg></button><div class="avatar" style="background:#eaf1e8;color:#45683e">MT</div></div></header>
+<main class="content">
+<div class="page-head"><div><h1 id="pageTitle">Kontrol pengiriman.</h1><p class="subtitle" id="pageSubtitle">Semua perjalanan material, dalam satu pandangan.</p></div><div class="buttons"><button class="btn" id="reportBtn"><svg class="icon"><use href="#i-share"/></svg>Laporan</button><button class="btn primary" id="addBtn"><svg class="icon"><use href="#i-plus"/></svg>Pengiriman baru</button></div></div>
+<div class="mode-banner" id="modeBanner"><span><b>RUANG DEMO</b> &nbsp; Data dan lokasi ilustrasi. Coba fitur tanpa mengubah spreadsheet Anda.</span><button id="connectBanner">Hubungkan data <span aria-hidden="true">↗</span></button></div>
+<div class="view active" data-view="overview">
+<section class="stats" id="stats" aria-label="Ringkasan operasional"></section>
+<div class="section-head"><div><h2>Pantau perjalanan</h2><p>Klik kendaraan untuk melihat detail pengirimannya.</p></div><span class="tag" id="mapBadge"><i class="dot"></i> Peta operasional</span></div>
+<section class="tracking-layout">
+<div class="map-card"><div class="map-top"><b id="mapTitle">Jaringan pengiriman</b><div class="buttons"><button class="btn small" id="playDemo"><svg class="icon"><use href="#i-play"/></svg>Putar simulasi</button><button class="icon-btn" id="fitMap" aria-label="Tampilkan semua lokasi" title="Tampilkan semua lokasi"><svg class="icon"><use href="#i-target"/></svg></button></div></div><div class="map-wrap"><div class="map-fallback" id="mapFallback"><svg class="icon"><use href="#i-pin"/></svg><b>Menyiapkan peta…</b><span>Data pengiriman tetap tersedia di bawah.</span></div><div class="map-canvas" id="map" aria-label="Peta lokasi pengiriman"></div><div class="map-status" id="mapStatus"></div><div class="map-overlay" id="mapNotice">Lokasi demo · bukan posisi kendaraan sebenarnya</div></div><div class="map-legend"><span><i class="legend-pin"></i> Lokasi terakhir</span><span><i class="legend-line"></i> Jejak titik terekam</span><span><i class="legend-dash"></i> Garis ke tujuan</span></div></div>
+<aside class="detail" id="detail" aria-label="Detail pengiriman dipilih"></aside>
+</section>
+<div class="lower-grid" id="overviewLower"><section class="panel" id="shipmentPanel"><div class="panel-title"><div><h2>Daftar pengiriman</h2><small id="tableSubtitle">Catatan per DO / resi</small></div><button class="text-btn" id="csvBtn" title="Ekspor hasil filter">Ekspor CSV <svg class="icon"><use href="#i-download"/></svg></button></div><div class="table-tools"><div class="tabs" id="statusTabs" aria-label="Filter status"><button class="active" data-filter="all">Semua</button><button data-filter="otw">Perjalanan</button><button data-filter="arrived">Diterima</button><button data-filter="late">Lewat ETA</button></div><label class="search"><svg class="icon"><use href="#i-search"/></svg><input id="searchInput" placeholder="Cari DO, material, plat…" aria-label="Cari pengiriman"></label></div><div class="table-scroll"><table><thead><tr><th>DO / MATERIAL</th><th>KENDARAAN</th><th>MUATAN</th><th>STATUS</th><th></th></tr></thead><tbody id="shipmentRows"></tbody></table></div><div class="table-footer"><span id="pageInfo"></span><div class="pagination"><button id="prevPage" aria-label="Halaman sebelumnya">‹</button><span id="pageNumber">1</span><button id="nextPage" aria-label="Halaman berikutnya">›</button></div></div></section><section class="panel" id="materialPreview"><div class="panel-title"><div><h2>Pemenuhan material</h2><small>Realisasi terhadap target pesanan</small></div><button class="text-btn" data-go="materials" aria-label="Lihat semua material"><svg class="icon"><use href="#i-arrow"/></svg></button></div><div class="material-list" id="materialsPreview"></div><div class="material-foot"><span><i class="small-dot"></i> Diterima</span><span><i class="small-dot light"></i> Perjalanan</span><span>Per item & satuan</span></div></section></div>
 </div>
-
-<!-- ================= MODAL 1: INPUT PENGIRIMAN ================= -->
-<div class="modal-overlay" id="addModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 style="margin:0; color:var(--primary);"><i class="fa-solid fa-truck-ramp-box"></i> Input Pengiriman Baru (DO)</h3>
-            <button class="close-btn" onclick="closeModal('addModal')"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        <div class="form-row">
-            <div style="flex:1;"><label>No Resi / DO</label><input type="text" id="addNo" placeholder="Contoh: DO-01"></div>
-            <div style="flex:1;"><label>Tanggal Berangkat</label><input type="date" id="addTgl"></div>
-        </div>
-        <label>Item Material</label>
-        <input type="text" id="addItem" placeholder="Contoh: UDITCH 60x60">
-        <label>Mutu</label>
-        <input type="text" id="addMutu" placeholder="Contoh: K350">
-        <div class="form-row">
-            <div style="flex:2;"><label>Jumlah</label><input type="number" id="addJumlah" step="0.01"></div>
-            <div style="flex:1;"><label>Satuan</label><input type="text" id="addSatuan"></div>
-        </div>
-        <div class="form-row">
-            <div style="flex:1;"><label>Nama Pengemudi</label><input type="text" id="addSopir"></div>
-            <div style="flex:1;"><label>Plat Kendaraan</label><input type="text" id="addPlat"></div>
-        </div>
-        <button class="action-btn btn-blue" onclick="submitPengirimanBaru()" id="btnAddSubmit" style="margin-top:10px;">
-            <i class="fa-solid fa-paper-plane"></i> Kirim Data Resi
-        </button>
-    </div>
-</div>
-
-<!-- ================= MODAL 2: INPUT TARGET PESANAN ================= -->
-<div class="modal-overlay" id="pesananModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 style="margin:0; color:var(--purple);"><i class="fa-solid fa-cart-plus"></i> Input Master Target</h3>
-            <button class="close-btn" onclick="closeModal('pesananModal')"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        <label>Nama Item Material (Base)</label>
-        <input type="text" id="pesananItem" placeholder="Contoh: UDITCH 60x60">
-        <div class="form-row">
-            <div style="flex:2;"><label>Total Target</label><input type="number" id="pesananJumlah" step="0.01"></div>
-            <div style="flex:1;"><label>Satuan</label><input type="text" id="pesananSatuan"></div>
-        </div>
-        <button class="action-btn" style="background:var(--purple); color:white; margin-top:10px;" onclick="submitPesananBaru()" id="btnPesananSubmit">
-            <i class="fa-solid fa-save"></i> Simpan Target Pesanan
-        </button>
-    </div>
-</div>
-
-<!-- ================= MODAL 3: DIAGRAM DETAIL PER ITEM ================= -->
-<div class="modal-overlay" id="diagramModal">
-    <div class="modal-content modal-large">
-        <div class="modal-header" style="position:sticky; top:-30px; background:white; z-index:10; padding-top:30px; margin-top:-30px;">
-            <h3 style="margin:0; color:var(--text-main); font-size:18px;"><i class="fa-solid fa-chart-bar" style="color:var(--primary);"></i> Progress & Sisa Per Item Material</h3>
-            <button class="close-btn" onclick="closeModal('diagramModal')"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        
-        <div id="diagramContainer">
-            <div style="text-align:center; padding:20px; color:#94a3b8;"><i class="fa-solid fa-spinner fa-spin"></i> Menghitung Kalkulasi...</div>
-        </div>
-    </div>
-</div>
-
+<div class="view" data-view="shipments"><div id="shipmentsMount"></div></div>
+<div class="view" data-view="materials"><div class="section-head"><div><h2>Target & realisasi material</h2><p>Jumlah hanya digabung untuk item dan satuan yang sama.</p></div><button class="btn primary" id="addTarget"><svg class="icon"><use href="#i-plus"/></svg>Target baru</button></div><section class="panel"><div class="material-list" id="materialsFull"></div></section></div>
+<div class="view" data-view="settings"><div class="settings-grid"><section class="settings-card"><h2>Koneksi spreadsheet</h2><p>Sambungkan dashboard dengan Google Apps Script v2. Data lama pada Pengiriman dan Master_Pesanan tetap digunakan.</p><div id="connectionInfo" style="margin-top:18px"></div><div class="buttons"><button class="btn primary" id="connectSettings">Atur koneksi</button><button class="btn" id="disconnectBtn">Kembali ke demo</button></div></section><section class="settings-card"><h2>Cara kerja pelacakan</h2><ul><li>Sopir membuka tautan khusus dan menekan <b>Mulai berbagi lokasi</b>.</li><li>HP mengirim koordinat maksimal sekali per menit selama halaman aktif.</li><li>Dashboard meminta pembaruan setiap 60 detik, saat tab terlihat.</li><li>Lokasi lebih dari 5 menit ditandai <b>lokasi lama</b>. Garis antartitik bukan petunjuk jalan.</li><li>ETA diisi tim logistik; belum memperhitungkan kemacetan.</li></ul></section><section class="settings-card"><h2>Data demo</h2><p>Semua contoh hanya tersimpan di browser ini. Anda bisa mencoba tambah DO, konfirmasi penerimaan, dan ubah target tanpa menyentuh data asli.</p><button class="btn" id="resetDemo">Reset contoh demo</button></section><section class="settings-card"><h2>Langkah pengembangan berikutnya</h2><ul><li>Penerimaan sebagian, barang rusak, dan selisih kuantitas.</li><li>Upload foto surat jalan langsung ke Drive.</li><li>Multi-proyek, multi-supplier, dan hak akses per tim.</li><li>Perangkat GPS dan ETA berdasarkan kondisi jalan.</li></ul><p>Fitur di atas merupakan ide lanjutan, belum aktif pada versi ini.</p></section></div></div>
+<footer><span>MaterialTrack Pro <span style="color:#b2bfb5">&nbsp; / &nbsp;</span> Built for better deliveries.</span><span id="lastSync">Demo interaktif · data ilustrasi</span></footer>
+</main></div>
+<dialog id="dialog" aria-labelledby="dialogTitle"><div class="dialog-head"><h2 id="dialogTitle"></h2><button class="icon-btn" id="closeDialog" aria-label="Tutup"><svg class="icon"><use href="#i-close"/></svg></button></div><form id="dialogForm"><div class="dialog-body" id="dialogBody"></div><div class="dialog-footer" id="dialogFooter"><button type="button" class="btn" id="cancelDialog">Batal</button><button type="submit" class="btn primary" id="submitDialog">Simpan</button></div></form></dialog>
+<div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // MASUKKAN URL APPS SCRIPT ANDA DI BAWAH INI
-    const API_URL = 'https://script.google.com/macros/s/AKfycbx1sqFB04reLD2XM9CFJUITXSyP50hizXX4TsYfflOx9Q6SuEp0mFzuF7YfuskXWa97/exec'; 
-
-    let dataPengiriman = [];
-    let dataPesanan = [];
-    let itemStats = {}; // Akan menyimpan rekap PER ITEM murni (bukan per satuan)
-
-    async function init() {
-        try {
-            const response = await fetch(API_URL);
-            const data = await response.json();
-            dataPengiriman = data.pengiriman;
-            dataPesanan = data.pesanan;
-            
-            calculatePerItemStats();
-            renderModernMap();
-            renderTrackingUI();
-            populateDropdowns();
-        } catch (e) {
-            document.getElementById('trackingList').innerHTML = `<div style="color:red; text-align:center;">Gagal Terhubung. Cek URL API.</div>`;
-        }
-    }
-
-    // ==========================================
-    // LOGIKA PERHITUNGAN MURNI PER ITEM
-    // ==========================================
-    function calculatePerItemStats() {
-        itemStats = {};
-        let totalJenis = 0;
-        let totalTrukSampai = 0;
-        let totalTrukOtw = 0;
-        let totalSelesai = 0;
-
-        // 1. Ambil data dari Master Pesanan (Berdasarkan NAMA ITEM)
-        dataPesanan.forEach(p => {
-            let itemName = (p['ITEM'] || '').trim().toUpperCase();
-            if(!itemName) return;
-            
-            if(!itemStats[itemName]) {
-                itemStats[itemName] = { target: 0, sampai: 0, otw: 0, sisa: 0, satuan: p['SATUAN'] || 'unit' };
-                totalJenis++;
-            }
-            itemStats[itemName].target += parseFloat(p['TOTAL PESANAN']) || 0;
-        });
-
-        // 2. Tambahkan data dari Pengiriman (Cocokkan dengan NAMA ITEM)
-        dataPengiriman.forEach(row => {
-            if(!row['NO']) return;
-            let itemName = (row['ITEM'] || '').trim().toUpperCase();
-            
-            // Jika ada barang dikirim yang belum ada di target, tetap munculkan
-            if(!itemStats[itemName]) {
-                itemStats[itemName] = { target: 0, sampai: 0, otw: 0, sisa: 0, satuan: row['SATUAN'] || 'unit' };
-                totalJenis++;
-            }
-            
-            let jumlah = parseFloat(row['JUMLAH']) || 0;
-            if(row['TANGGAL SAMPAI'] !== "") {
-                itemStats[itemName].sampai += jumlah;
-                totalTrukSampai++;
-            } else {
-                itemStats[itemName].otw += jumlah;
-                totalTrukOtw++;
-            }
-        });
-
-        // 3. Render Top Overview Grid & Siapkan Data untuk Diagram
-        for(let key in itemStats) {
-            let s = itemStats[key];
-            s.sisa = s.target - (s.sampai + s.otw);
-            if(s.sisa < 0) s.sisa = 0;
-            
-            // Cek apakah item ini sudah 100% selesai
-            if(s.target > 0 && s.sampai >= s.target) {
-                totalSelesai++;
-            }
-        }
-
-        document.getElementById('statJenis').innerText = totalJenis;
-        document.getElementById('statSelesai').innerText = totalSelesai;
-        document.getElementById('statTrukSampai').innerText = totalTrukSampai;
-        document.getElementById('statTrukOtw').innerText = totalTrukOtw;
-
-        // 4. Render Diagram Detail
-        renderDiagrams();
-    }
-
-    // ==========================================
-    // RENDER DIAGRAM PROGRESS PER ITEM
-    // ==========================================
-    function renderDiagrams() {
-        const container = document.getElementById('diagramContainer');
-        container.innerHTML = '';
-        
-        let hasData = false;
-        
-        for(let item in itemStats) {
-            hasData = true;
-            let s = itemStats[item];
-            let sat = s.satuan.toLowerCase();
-            
-            // Hitung Persentase (Maksimal 100%)
-            let safeTarget = s.target > 0 ? s.target : (s.sampai + s.otw) || 1; // Cegah div/0
-            let pctSampai = (s.sampai / safeTarget) * 100;
-            let pctOtw = (s.otw / safeTarget) * 100;
-            
-            // Batasi persentase visual mentok di 100 agar grafik tidak pecah
-            if(pctSampai > 100) pctSampai = 100;
-            if((pctSampai + pctOtw) > 100) pctOtw = 100 - pctSampai;
-
-            // Indikator Status
-            let statusText = "";
-            if(s.target > 0 && s.sampai >= s.target) {
-                statusText = `<span style="color:var(--success); font-size:12px;"><i class="fa-solid fa-circle-check"></i> Selesai 100%</span>`;
-            } else if (s.target == 0) {
-                statusText = `<span style="color:var(--warning); font-size:12px;">! Target Belum Diatur</span>`;
-            } else {
-                statusText = `<span style="color:var(--text-muted); font-size:12px;">Progress: ${pctSampai.toFixed(1)}%</span>`;
-            }
-
-            container.innerHTML += `
-                <div class="diag-item">
-                    <div class="diag-header">
-                        <div><i class="fa-solid fa-cube" style="color:#94a3b8; margin-right:5px;"></i> ${item}</div>
-                        ${statusText}
-                    </div>
-                    
-                    <div class="diag-bar-bg">
-                        <div class="diag-fill-sampai" style="width: ${pctSampai}%;"></div>
-                        <div class="diag-fill-otw" style="width: ${pctOtw}%;"></div>
-                    </div>
-                    
-                    <div class="diag-stats">
-                        <div class="d-box d-target">
-                            <span>Target</span>
-                            <b>${s.target.toLocaleString('id-ID')} ${sat}</b>
-                        </div>
-                        <div class="d-box d-sampai">
-                            <span>Sampai Site</span>
-                            <b>${s.sampai.toLocaleString('id-ID')} ${sat}</b>
-                        </div>
-                        <div class="d-box d-otw">
-                            <span>Dalam Jalan (OTW)</span>
-                            <b>${s.otw.toLocaleString('id-ID')} ${sat}</b>
-                        </div>
-                        <div class="d-box d-sisa">
-                            <span>Sisa Pabrik</span>
-                            <b>${s.sisa.toLocaleString('id-ID')} ${sat}</b>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        if(!hasData) container.innerHTML = `<div style="text-align:center; color:#94a3b8;">Belum ada data pesanan/pengiriman.</div>`;
-    }
-
-    function renderModernMap() {
-        const truckContainer = document.getElementById('modernMapTrucks');
-        truckContainer.innerHTML = ''; 
-        let otwCount = 0;
-        dataPengiriman.forEach((row) => {
-            if(!row['NO'] || row['TANGGAL SAMPAI'] !== "") return;
-            const delay = (otwCount * 2.5); 
-            truckContainer.innerHTML += `
-                <div class="modern-truck truck-otw" style="animation-delay: -${delay}s;">
-                    <div class="truck-icon"><i class="fa-solid fa-truck-moving"></i></div>
-                    <div class="truck-label">${row['PLAT KENDARAAN']} <span style="color:#60a5fa;">(${row['JUMLAH']}${row['SATUAN']})</span></div>
-                </div>
-            `;
-            otwCount++;
-        });
-    }
-
-    function renderTrackingUI() {
-        const container = document.getElementById('trackingList');
-        container.innerHTML = ''; 
-        const sortedData = [...dataPengiriman].reverse();
-        sortedData.forEach(row => {
-            if(!row['NO']) return;
-            const isArrived = row['TANGGAL SAMPAI'] !== "";
-            container.innerHTML += `
-                <div class="tracking-item">
-                    <div class="truck-header">
-                        <strong style="color:var(--primary); font-size:15px;">#${row['NO']} - ${row['ITEM']}</strong>
-                        ${isArrived ? '<span style="background:#ecfdf5; color:var(--success); padding:4px 10px; border-radius:8px; font-size:12px; font-weight:bold;">Terkirim</span>' : '<span style="background:#fffbeb; color:var(--warning); padding:4px 10px; border-radius:8px; font-size:12px; font-weight:bold;">OTW</span>'}
-                    </div>
-                    <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted);">
-                        <div><i class="fa-solid fa-user-tie"></i> ${row['NAMA PENGEMUDI']}</div>
-                        <div><i class="fa-solid fa-car"></i> <b>${row['PLAT KENDARAAN']}</b></div>
-                        <div><i class="fa-solid fa-cube"></i> <b>${row['JUMLAH']} ${row['SATUAN']}</b></div>
-                    </div>
-                </div>
-            `;
-        });
-    }
-
-    function populateDropdowns() {
-        const selS = document.getElementById('selResiSampai');
-        const selE = document.getElementById('selResiEdit');
-        selS.innerHTML = '<option value="">-- Pilih Truk (Status OTW) --</option>';
-        selE.innerHTML = '<option value="">-- Pilih Resi Untuk Edit --</option>';
-        dataPengiriman.forEach(row => {
-            if(!row['NO']) return;
-            let text = `${row['NO']} - ${row['PLAT KENDARAAN']} (${row['JUMLAH']} ${row['SATUAN']})`;
-            if(row['TANGGAL SAMPAI'] === "") selS.innerHTML += `<option value="${row['NO']}">${text}</option>`;
-            selE.innerHTML += `<option value="${row['NO']}">${text}</option>`;
-        });
-    }
-
-    function openModal(id) { document.getElementById(id).classList.add('active'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-    function switchTab(t, el) {
-        document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
-        document.getElementById(t).classList.add('active');
-        el.classList.add('active');
-    }
-
-    function loadEditForm() {
-        let r = dataPengiriman.find(x => x['NO'] == document.getElementById('selResiEdit').value);
-        if(r) {
-            document.getElementById('edNo').value = r['NO'];
-            document.getElementById('edJml').value = r['JUMLAH'];
-            document.getElementById('edSat').value = r['SATUAN'];
-            document.getElementById('edPlat').value = r['PLAT KENDARAAN'];
-        }
-    }
-
-    async function reqApi(payload, btnId, lText, oText) {
-        let btn = document.getElementById(btnId);
-        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${lText}...`; btn.disabled = true;
-        try {
-            await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload), headers: { "Content-Type": "text/plain;charset=utf-8" } });
-            alert("Berhasil!"); await init(); 
-        } catch(e) { alert("Error Server!"); }
-        btn.innerHTML = oText; btn.disabled = false;
-    }
-
-    function updateSampai() {
-        let no = document.getElementById('selResiSampai').value, tgl = document.getElementById('inTglSampai').value;
-        if(!no || !tgl) return alert("Pilih Resi dan Tanggal!");
-        reqApi({action:'update_sampai', no:no, tanggal_sampai:tgl}, 'btnSampai', 'Loading', '<i class="fa-solid fa-check"></i> Tandai Barang Sampai');
-    }
-
-    function simpanEdit() {
-        let lama = document.getElementById('selResiEdit').value;
-        if(!lama) return alert("Pilih resi!");
-        reqApi({
-            action: 'edit_resi', no_lama: lama, no_baru: document.getElementById('edNo').value,
-            jumlah: document.getElementById('edJml').value, satuan: document.getElementById('edSat').value,
-            plat: document.getElementById('edPlat').value
-        }, 'btnEdit', 'Menyimpan', '<i class="fa-solid fa-pen"></i> Simpan Perubahan');
-    }
-
-    function submitPengirimanBaru() {
-        let no = document.getElementById('addNo').value;
-        if(!no) return alert("No Resi Wajib Diisi!");
-        let payload = {
-            action: 'tambah_resi', no: no, tgl_berangkat: document.getElementById('addTgl').value,
-            item: document.getElementById('addItem').value, mutu: document.getElementById('addMutu').value,
-            jumlah: document.getElementById('addJumlah').value, satuan: document.getElementById('addSatuan').value,
-            pengemudi: document.getElementById('addSopir').value, plat: document.getElementById('addPlat').value
-        };
-        reqApi(payload, 'btnAddSubmit', 'Menyimpan', '<i class="fa-solid fa-paper-plane"></i> Kirim Data Resi').then(() => {
-            closeModal('addModal'); document.querySelectorAll('#addModal input').forEach(inp => inp.value = '');
-        });
-    }
-
-    function submitPesananBaru() {
-        let item = document.getElementById('pesananItem').value;
-        let target = document.getElementById('pesananJumlah').value;
-        let sat = document.getElementById('pesananSatuan').value;
-        if(!item || !target || !sat) return alert("Semua kolom Master Pesanan wajib diisi!");
-        let payload = { action: 'tambah_pesanan', item: item, total_pesanan: target, satuan: sat };
-        reqApi(payload, 'btnPesananSubmit', 'Menyimpan Base', '<i class="fa-solid fa-save"></i> Simpan Target Pesanan').then(() => {
-            closeModal('pesananModal'); document.querySelectorAll('#pesananModal input').forEach(inp => inp.value = '');
-        });
-    }
-
-    function shareWhatsApp() {
-        let text = `*🚧 REPORT LOGISTIK ONSITE*\nTanggal: ${new Date().toLocaleDateString('id-ID')}\n\n`;
-        text += `*📊 PROGRESS MATERIAL PER ITEM:*\n`;
-        
-        let i = 1;
-        for(let key in itemStats) {
-            let s = itemStats[key];
-            text += `*${i}. ${key}*\n`;
-            text += ` 🎯 Target : ${s.target.toLocaleString('id-ID')} ${s.satuan}\n`;
-            text += ` ✅ Sampai : ${s.sampai.toLocaleString('id-ID')} ${s.satuan}\n`;
-            text += ` 🚚 OTW    : ${s.otw.toLocaleString('id-ID')} ${s.satuan}\n`;
-            text += ` ⏳ Sisa   : ${s.sisa.toLocaleString('id-ID')} ${s.satuan}\n\n`;
-            i++;
-        }
-        
-        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-    }
-
-    window.onload = init;
+'use strict';
+// Bisa diisi URL deployment /exec. Biarkan kosong untuk memulai dalam mode demo.
+const API_URL = '';
+const $=id=>document.getElementById(id);
+const icons=name=>`<svg class="icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm=v=>String(v??'').trim().replace(/\s+/g,' ').toUpperCase();
+const fmt=v=>Number(v||0).toLocaleString('id-ID',{maximumFractionDigits:2});
+const qty=v=>{if(typeof v==='number')return Number.isFinite(v)?v:0;const s=String(v??'').trim();if(!s)return 0;if(!/^-?\d+(\.\d+)?$/.test(s))return NaN;return Number(s)};
+const validPoint=(a,b)=>a!==''&&b!==''&&a!=null&&b!=null&&Number.isFinite(Number(a))&&Number.isFinite(Number(b))&&Math.abs(Number(a))<=90&&Math.abs(Number(b))<=180;
+const arrived=r=>!!String(r['TANGGAL SAMPAI']??'').trim();
+const late=r=>!arrived(r)&&r.ETA&&Number.isFinite(Date.parse(r.ETA))&&Date.parse(r.ETA)<Date.now();
+const numOrZero=n=>Number.isFinite(qty(n))?qty(n):0;
+const storage={get(k,session=false){try{return(session?sessionStorage:localStorage).getItem(k)}catch(e){return null}},set(k,v,session=false){try{(session?sessionStorage:localStorage).setItem(k,v)}catch(e){}},remove(k,session=false){try{(session?sessionStorage:localStorage).removeItem(k)}catch(e){}}};
+let state={mode:'demo',shipments:[],orders:[],selected:'',filter:'all',query:'',page:1,view:'overview',lastSync:null,connected:false,busy:false,epoch:0,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'Asia/Jakarta'};
+let settings={url:storage.get('mt.url')||API_URL,key:storage.get('mt.key',true)||'',driverURL:storage.get('mt.driver')||''};
+let map=null,markers=new Map(),routeLayer=null,endpointLayer=null,mapReady=false,simTimer=null,simStep=0,requestInFlight=null,pollTimer=null,formAction=null,modalRow=null,mutationId=0;
+const PAGE_SIZE=7;
+const DEMO_PATH=[[-8.639,115.201],[-8.650,115.201],[-8.660,115.201],[-8.670,115.200],[-8.680,115.192],[-8.692,115.191],[-8.705,115.195],[-8.718,115.204],[-8.729,115.210],[-8.738,115.215],[-8.742,115.221]];
+function today(){return new Intl.DateTimeFormat('en-CA',{timeZone:state.timezone,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());}
+function timeLabel(v,short=false){if(!v)return 'Belum diisi';if(/^\d{4}-\d{2}-\d{2}$/.test(String(v))){const [y,m,d]=v.split('-');return `${d}/${m}/${y}`;}const d=new Date(v);if(!Number.isFinite(d.getTime()))return String(v);return d.toLocaleString('id-ID',{timeZone:state.timezone,day:short?undefined:'2-digit',month:short?undefined:'short',hour:'2-digit',minute:'2-digit'});}
+function ageLabel(v){const t=Date.parse(v);if(!Number.isFinite(t))return 'waktu tidak tersedia';const m=Math.max(0,Math.floor((Date.now()-t)/60000));return m<1?'baru saja':m<60?`${m} menit lalu`:m<1440?`${Math.floor(m/60)} jam lalu`:`${Math.floor(m/1440)} hari lalu`;}
+function gpsState(r){if(!validPoint(r.LAT,r.LNG))return {label:'Belum ada lokasi',class:'gray',old:true};const source=r['SUMBER LOKASI']||'Tanpa sumber';const dt=Date.parse(r['GPS UPDATE']);const old=!Number.isFinite(dt)||Date.now()-dt>300000||dt>Date.now()+60000;return {label:old?'Lokasi lama':source==='Manual'?'Lokasi manual':source==='GPS HP'?'GPS terbaru':source==='Demo'?'Lokasi demo':'Lokasi tercatat',class:old?'amber':source==='Manual'?'gray':'',old};}
+function summary(ships,orders){const groups=new Map();function get(item,unit){const key=JSON.stringify([norm(item),norm(unit)]);if(!groups.has(key))groups.set(key,{item:String(item||'Tanpa item'),unit:String(unit||'Tanpa satuan'),target:0,received:0,transit:0});return groups.get(key)}orders.forEach(r=>{if(r.ITEM)get(r.ITEM,r.SATUAN).target+=numOrZero(r['TOTAL PESANAN']);});ships.forEach(r=>{if(!r.NO)return;const s=get(r.ITEM,r.SATUAN);s[arrived(r)?'received':'transit']+=numOrZero(r.JUMLAH)});return [...groups.values()].map(s=>({...s,remaining:Math.max(0,s.target-s.received-s.transit),excess:Math.max(0,s.received+s.transit-s.target),pct:s.target>0?100*s.received/s.target:0}));}
+function demoData(){const now=Date.now(),iso=m=>new Date(now+m*60000).toISOString(),day=today();const orders=[{ITEM:'U-Ditch 60 × 60', 'TOTAL PESANAN':240,SATUAN:'pcs'},{ITEM:'Paving block K-500','TOTAL PESANAN':1200,SATUAN:'m²'},{ITEM:'Kanstin 40 × 25','TOTAL PESANAN':600,SATUAN:'pcs'},{ITEM:'Agregat kelas A','TOTAL PESANAN':350,SATUAN:'m³'}];const rows=[['DO-001','U-Ditch 60 × 60','K-350',72,'pcs','DK 8412 MX','Wayan S.','done'],['DO-002','Paving block K-500','K-500',420,'m²','DK 8251 HF','Made P.','done'],['DO-003','Kanstin 40 × 25','K-225',240,'pcs','DK 8590 DS','Agus S.','done'],['DO-004','Agregat kelas A','CBR 80%',90,'m³','DK 8910 TB','Ketut A.','done'],['DO-005','U-Ditch 60 × 60','K-350',48,'pcs','DK 8241 AF','Budi S.','otw'],['DO-006','Paving block K-500','K-500',120,'m²','DK 9312 BT','Made K.','otw'],['DO-007','Kanstin 40 × 25','K-225',60,'pcs','DK 8526 CR','Agus W.','late'],['DO-008','Agregat kelas A','CBR 80%',30,'m³','DK 8350 ES','Ketut M.','otw']];const ships=rows.map((a,i)=>({NO:a[0],ITEM:a[1],MUTU:a[2],JUMLAH:a[3],SATUAN:a[4],'PLAT KENDARAAN':a[5],'NAMA PENGEMUDI':a[6],'TANGGAL BERANGKAT':day,'TANGGAL SAMPAI':a[7]==='done'?day:'',ASAL:'Gudang Denpasar',TUJUAN:'Site Tanjung Benoa','ASAL LAT':-8.639,'ASAL LNG':115.201,'TUJUAN LAT':-8.742,'TUJUAN LNG':115.221,ETA:iso(a[7]==='late'?-35:60+i*8),LAT:i===4?-8.680:i===5?-8.659:i===6?-8.705:'',LNG:i===4?115.192:i===5?115.201:i===6?115.195:'',AKURASI:i===4?12:20,'GPS UPDATE':iso(i===6?-18:-1),'SUMBER LOKASI':'Demo','GPS HISTORY':i===4?DEMO_PATH.slice(0,5).map((p,j)=>({lat:p[0],lng:p[1],at:iso(-20+j*4),source:'Demo'})):[],PENERIMA:a[7]==='done'?'Tim site':'','UPDATED AT':iso(-20),CATATAN:i===4?'Contoh pengiriman material ke site.':''}));return {shipments:ships,orders};}
+function loadDemo(reset=false){stopSim();state.epoch++;state.mode='demo';state.connected=false;let data=null;if(!reset)try{data=JSON.parse(storage.get('mt.demo')||'null')}catch(e){}if(!data||!Array.isArray(data.shipments)||!Array.isArray(data.orders))data=demoData();state.shipments=data.shipments;state.orders=data.orders;state.selected=state.shipments.find(r=>!arrived(r))?.NO||state.shipments[0]?.NO||'';state.page=1;state.lastSync=null;renderAll(true);}
+function saveDemo(){storage.set('mt.demo',JSON.stringify({shipments:state.shipments,orders:state.orders}));}
+function toast(message,error=false){const el=document.createElement('div');el.className='toast'+(error?' error':'');el.textContent=message;$('toasts').append(el);setTimeout(()=>el.remove(),7000);}
+function filtered(){const q=norm(state.query);return [...state.shipments].reverse().filter(r=>r.NO).filter(r=>state.filter==='all'||state.filter==='arrived'&&arrived(r)||state.filter==='otw'&&!arrived(r)||state.filter==='late'&&late(r)).filter(r=>!q||[r.NO,r.ITEM,r['PLAT KENDARAAN'],r['NAMA PENGEMUDI'],r.MUTU].some(v=>norm(v).includes(q)));}
+function renderStatus(){const demo=state.mode==='demo';$('connection').innerHTML=`<i class="dot ${demo?'amber':state.connected?'':'red'}"></i> ${demo?'Mode demo':state.connected?'Spreadsheet terhubung':'Koneksi terputus'}`;$('modeBanner').innerHTML=demo?`<span><b>RUANG DEMO</b> &nbsp; Data dan lokasi ilustrasi. Coba fitur tanpa mengubah spreadsheet Anda.</span><button id="connectBanner">Hubungkan data ↗</button>`:`<span><b>${state.connected?'DATA SPREADSHEET':'BELUM TERSINKRONISASI'}</b> &nbsp; ${state.connected?'Pembaruan setiap 60 detik. Waktu GPS diperiksa secara terpisah.':'Data terakhir tetap ditampilkan. Periksa koneksi sebelum menyimpan.'}</span><button id="connectBanner">Atur koneksi ↗</button>`;$('connectBanner').onclick=openConnection;$('lastSync').textContent=demo?'Demo interaktif · seluruh data ilustrasi':state.lastSync?'Sinkronisasi terakhir '+timeLabel(state.lastSync)+' · '+state.timezone:'Menunggu koneksi spreadsheet';$('playDemo').classList.toggle('hidden',!demo);$('connectionInfo').innerHTML=`<span class="tag ${demo?'amber':state.connected?'':'red'}">${demo?'Mode demo':state.connected?'Terhubung':'Terputus'}</span><p style="margin-top:10px">${settings.url?esc(settings.url.slice(0,62))+'…':'URL belum diatur.'}</p><p>Kode akses disimpan hanya di sesi tab browser. Tautan sopir memiliki izin terbatas untuk satu DO.</p>`;}
+function renderStats(){const active=state.shipments.filter(r=>!arrived(r)),done=state.shipments.filter(arrived),mat=summary(state.shipments,state.orders);const cards=[['Perjalanan aktif',active.length,'DO sedang menuju lokasi','truck','focus'],['Sudah diterima',done.length,'DO dikonfirmasi oleh tim site','check',''],['Material tercukupi',mat.filter(s=>s.target>0&&s.received>=s.target).length,`dari ${mat.filter(s=>s.target>0).length} target item & satuan`,'box',''],['Perlu perhatian',active.filter(r=>late(r)||!validPoint(r.LAT,r.LNG)||gpsState(r).old).length,'Lewat ETA / lokasi perlu diperbarui','clock','warn']];$('stats').innerHTML=cards.map(([l,n,s,i,c])=>`<article class="stat ${c}"><div class="stat-label">${l}${icons(i)}</div><div class="number">${String(n).padStart(2,'0')}</div><small>${s}</small></article>`).join('');$('navCount').textContent=active.length;}
+function statusTag(r){return arrived(r)?'<span class="tag">● Diterima</span>':late(r)?'<span class="tag red">● Lewat ETA</span>':'<span class="tag amber">● Perjalanan</span>';}
+function renderTable(){const rows=filtered(),pages=Math.max(1,Math.ceil(rows.length/PAGE_SIZE));state.page=Math.min(state.page,pages);const batch=rows.slice((state.page-1)*PAGE_SIZE,state.page*PAGE_SIZE);$('shipmentRows').innerHTML=batch.length?batch.map(r=>`<tr data-no="${esc(r.NO)}" class="${String(r.NO)===String(state.selected)?'selected':''}"><td><b>${esc(r.NO)}</b><small>${esc(r.ITEM)}</small></td><td><b>${esc(r['PLAT KENDARAAN']||'—')}</b><small>${esc(r['NAMA PENGEMUDI']||'—')}</small></td><td>${fmt(r.JUMLAH)} <small>${esc(r.SATUAN)}</small></td><td>${statusTag(r)}</td><td><button class="icon-btn row-detail" data-no="${esc(r.NO)}" aria-label="Detail ${esc(r.NO)}" title="Lihat detail">${icons('arrow')}</button></td></tr>`).join(''):'<tr><td colspan="5"><div class="empty">Tidak ada pengiriman yang sesuai.<br>Coba kata kunci lain atau tambahkan DO baru.</div></td></tr>';$('pageInfo').textContent=rows.length?`${(state.page-1)*PAGE_SIZE+1}–${Math.min(state.page*PAGE_SIZE,rows.length)} dari ${rows.length} pengiriman`:'0 pengiriman';$('pageNumber').textContent=`${state.page} / ${pages}`;$('prevPage').disabled=state.page<=1;$('nextPage').disabled=state.page>=pages;document.querySelectorAll('[data-filter]').forEach(el=>el.classList.toggle('active',el.dataset.filter===state.filter));}
+function materialHTML(s,full){const r=Math.max(0,Math.min(100,s.pct)),t=s.target>0?Math.min(100-r,Math.max(0,100*s.transit/s.target)):0;return `<article class="material-item"><div class="material-head"><b>${esc(s.item)}</b><span>${s.target>0?fmt(s.pct)+'%':'Tanpa target'}</span></div><div class="progress" role="img" aria-label="Diterima ${fmt(s.received)} dari target ${fmt(s.target)} ${esc(s.unit)}"><div class="arrived" style="width:${r}%"></div><div class="otw" style="width:${t}%"></div></div><div class="material-count"><strong>${fmt(s.received)} / ${fmt(s.target)} ${esc(s.unit)}</strong><span>${fmt(s.transit)} ${esc(s.unit)} dalam perjalanan</span></div>${full?`<div class="material-meta"><div><span>Target</span><b>${fmt(s.target)} ${esc(s.unit)}</b></div><div><span>Diterima</span><b>${fmt(s.received)} ${esc(s.unit)}</b></div><div><span>Perjalanan</span><b>${fmt(s.transit)} ${esc(s.unit)}</b></div><div><span>Belum dikirim</span><b>${fmt(s.remaining)} ${esc(s.unit)}</b></div></div>`:''}${s.target>0&&s.excess>0?`<div class="tag amber" style="margin-top:9px">Melebihi target ${fmt(s.excess)} ${esc(s.unit)}</div>`:''}</article>`;}
+function renderMaterials(){const list=summary(state.shipments,state.orders);$('materialsPreview').innerHTML=list.slice(0,3).map(s=>materialHTML(s,false)).join('')||'<div class="empty">Belum ada target material.</div>';$('materialsFull').innerHTML=list.map(s=>materialHTML(s,true)).join('')||'<div class="empty">Tambahkan target pesanan pertama.</div>';}
+function current(){return state.shipments.find(r=>String(r.NO)===String(state.selected));}
+function renderDetail(){const r=current();if(!r){$('detail').innerHTML='<div class="empty">Pilih atau tambahkan pengiriman untuk melihat detail.</div>';return;}const gps=gpsState(r);$('detail').innerHTML=`<div class="detail-label">PENGIRIMAN DIPILIH ${icons('truck')}</div><select id="selectDO" aria-label="Pilih pengiriman">${state.shipments.map(x=>`<option value="${esc(x.NO)}" ${String(x.NO)===String(r.NO)?'selected':''}>${esc(x.NO)} · ${esc(x['PLAT KENDARAAN'])}</option>`).join('')}</select><div class="vehicle"><div class="vehicle-icon">${icons('truck')}</div><div><h3>${esc(r['PLAT KENDARAAN']||'Tanpa plat')}</h3><p>${esc(r['NAMA PENGEMUDI']||'Pengemudi belum diisi')}</p></div></div>${statusTag(r)} <span class="tag ${gps.class}">${gps.label}</span><div class="detail-info"><div><span>MATERIAL</span><b>${esc(r.ITEM)}</b></div><div><span>MUATAN</span><b>${fmt(r.JUMLAH)} ${esc(r.SATUAN)}</b></div><div><span>${arrived(r)?'DITERIMA':'ETA TIM LOGISTIK'}</span><b>${esc(timeLabel(arrived(r)?r['TANGGAL SAMPAI']:r.ETA))}</b></div><div><span>LOKASI TERAKHIR</span><b>${validPoint(r.LAT,r.LNG)?esc(ageLabel(r['GPS UPDATE'])):'Belum tersedia'}</b></div></div><div class="journey"><div class="journey-step current"><b>${esc(r.ASAL||'Asal belum diisi')}</b><small>Berangkat ${esc(timeLabel(r['TANGGAL BERANGKAT']))}</small></div><div class="journey-step ${arrived(r)?'current':''}"><b>${esc(r.TUJUAN||'Tujuan belum diisi')}</b><small>${arrived(r)?'Diterima '+esc(r.PENERIMA||'tim site'):'Menunggu konfirmasi site'}</small></div></div><div class="detail-actions"><button class="btn small" id="editSelected">${icons('edit')}Edit DO</button><button class="btn small" id="locSelected" ${arrived(r)?'disabled':''}>${icons('pin')}Lokasi</button><button class="btn small" id="driverSelected" ${arrived(r)?'disabled':''}>Tautan sopir</button><button class="btn primary small" id="arriveSelected" ${arrived(r)?'disabled':''}>${icons('check')}Terima</button></div><p class="note">${state.mode==='demo'?'Seluruh data perjalanan ini adalah contoh.':r['SUMBER LOKASI']==='GPS HP'?'GPS dari HP sopir · akurasi '+fmt(r.AKURASI)+' m.':'Lokasi manual dan GPS diberi label berbeda.'}${validPoint(r.LAT,r.LNG)?'<br>Koordinat: '+Number(r.LAT).toFixed(5)+', '+Number(r.LNG).toFixed(5):''}${r.CATATAN?'<br>'+esc(r.CATATAN):''}</p>${r['BUKTI URL']&&/^https:\/\//i.test(r['BUKTI URL'])?`<a class="text-btn" target="_blank" rel="noopener noreferrer" href="${esc(r['BUKTI URL'])}">Lihat bukti penerimaan ↗</a>`:''}`;$('selectDO').onchange=e=>selectShipment(e.target.value);$('editSelected').onclick=()=>openEdit(r);$('locSelected').onclick=()=>openLocation(r);$('arriveSelected').onclick=()=>openArrival(r);$('driverSelected').onclick=()=>openDriverLink(r);}
+function renderAll(fit=false){if(!current())state.selected=state.shipments.find(r=>!arrived(r))?.NO||state.shipments[0]?.NO||'';renderStatus();renderStats();renderTable();renderMaterials();renderDetail();renderMap(fit);}
+function selectShipment(no){state.selected=String(no);renderDetail();renderTable();renderMap(false);const r=current();if(map&&r&&validPoint(r.LAT,r.LNG))map.panTo([+r.LAT,+r.LNG]);}
+function truckIcon(r){const selected=String(r.NO)===String(state.selected);return L.divIcon({className:'truck-marker',html:`<div class="truck-bubble ${selected?'selected':''} ${gpsState(r).old?'stale':''}">${icons('truck')}</div><span class="truck-marker-label">${esc(r['PLAT KENDARAAN']||r.NO)}</span>`,iconSize:[36,36],iconAnchor:[18,18]});}
+function initMap(){if(typeof L==='undefined'){$('map').classList.add('hidden');$('mapFallback').innerHTML=icons('pin')+'<b>Peta belum dapat dimuat.</b><span>Periksa internet / akses unpkg.com.<br>Detail dan koordinat pengiriman tetap tersedia.</span>';$('mapFallback').querySelector('b').textContent='Peta belum dapat dimuat.';return;}map=L.map('map',{zoomControl:false,scrollWheelZoom:false}).setView([-8.685,115.206],12);L.control.zoom({position:'bottomright'}).addTo(map);const tiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}).addTo(map);let errors=0;tiles.on('tileerror',()=>{errors++;if(errors>5)$('mapNotice').textContent='Peta dasar gagal dimuat. Periksa internet; penanda tetap berdasarkan koordinat.'});routeLayer=L.layerGroup().addTo(map);endpointLayer=L.layerGroup().addTo(map);mapReady=true;renderMap(true);}
+function moveMarker(marker,to){if(marker._anim)cancelAnimationFrame(marker._anim);if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){marker.setLatLng(to);return;}const from=marker.getLatLng();if(from.lat===to[0]&&from.lng===to[1])return;const start=performance.now();function tick(t){const f=Math.min(1,(t-start)/900),ease=f*f*(3-2*f);marker.setLatLng([from.lat+(to[0]-from.lat)*ease,from.lng+(to[1]-from.lng)*ease]);if(f<1)marker._anim=requestAnimationFrame(tick);else marker._anim=null;}marker._anim=requestAnimationFrame(tick);}
+function renderMap(fit=false){const active=state.shipments.filter(r=>!arrived(r)),withLoc=active.filter(r=>validPoint(r.LAT,r.LNG)),r=current();$('mapTitle').textContent=`${active.length} pengiriman aktif · ${withLoc.length} memiliki lokasi`;$('mapBadge').innerHTML=`<i class="dot ${state.mode==='demo'?'amber':''}"></i> ${state.mode==='demo'?'Data ilustrasi':'Lokasi tercatat'}`;$('mapStatus').innerHTML=r?`<strong>${esc(r.NO)} · ${esc(r['PLAT KENDARAAN'])}</strong>${validPoint(r.LAT,r.LNG)?esc(gpsState(r).label)+' · '+esc(ageLabel(r['GPS UPDATE'])):'Belum ada koordinat — isi lokasi atau gunakan tautan sopir'}`:'Belum ada pengiriman';$('mapNotice').textContent=state.mode==='demo'?'DEMO · lokasi ilustrasi, bukan posisi kendaraan sebenarnya':'Garis antartitik / ke tujuan bukan rute jalan atau estimasi jarak';if(!mapReady)return;const visible=[...withLoc];if(r&&arrived(r)&&validPoint(r.LAT,r.LNG))visible.push(r);const keep=new Set(visible.map(x=>String(x.NO)));markers.forEach((m,key)=>{if(!keep.has(key)){if(m._anim)cancelAnimationFrame(m._anim);map.removeLayer(m);markers.delete(key)}});visible.forEach(x=>{const key=String(x.NO);let m=markers.get(key);if(!m){m=L.marker([+x.LAT,+x.LNG],{icon:truckIcon(x),title:String(x.NO)}).addTo(map).on('click',()=>selectShipment(key));markers.set(key,m)}else{m.setIcon(truckIcon(x));moveMarker(m,[+x.LAT,+x.LNG]);}m.setZIndexOffset(key===String(state.selected)?1000:0)});routeLayer.clearLayers();endpointLayer.clearLayers();if(r){let history=Array.isArray(r['GPS HISTORY'])?r['GPS HISTORY']:[];const points=history.filter(p=>validPoint(p.lat,p.lng)).map(p=>[+p.lat,+p.lng]);if(points.length>1){L.polyline(points,{color:'#fff',weight:7,opacity:.8}).addTo(routeLayer);L.polyline(points,{color:'#1e8b64',weight:3.5,opacity:.9}).addTo(routeLayer);}if(validPoint(r['TUJUAN LAT'],r['TUJUAN LNG'])&&validPoint(r.LAT,r.LNG))L.polyline([[+r.LAT,+r.LNG],[+r['TUJUAN LAT'],+r['TUJUAN LNG']]],{color:'#6f977b',weight:2,dashArray:'5 7',opacity:.7}).addTo(routeLayer);['ASAL','TUJUAN'].forEach(kind=>{if(validPoint(r[kind+' LAT'],r[kind+' LNG']))L.marker([+r[kind+' LAT'],+r[kind+' LNG']],{icon:L.divIcon({className:'',html:'<div class="endpoint"></div>',iconSize:[15,15],iconAnchor:[7,7]})}).bindTooltip(esc(r[kind]||kind),{direction:'top'}).addTo(endpointLayer)});}if(fit)fitBounds();}
+function fitBounds(){if(!map)return;const points=[];state.shipments.filter(r=>!arrived(r)).forEach(r=>{if(validPoint(r.LAT,r.LNG))points.push([+r.LAT,+r.LNG]);});const r=current();if(r){['ASAL','TUJUAN',''].forEach(prefix=>{const a=prefix?prefix+' LAT':'LAT',b=prefix?prefix+' LNG':'LNG';if(validPoint(r[a],r[b]))points.push([+r[a],+r[b]])});}if(points.length)map.fitBounds(points,{padding:[48,55],maxZoom:14});else map.setView([-2.5,118],5);}
+function stopSim(){if(simTimer)clearInterval(simTimer);simTimer=null;if($('playDemo'))$('playDemo').innerHTML=icons('play')+'Putar simulasi';}
+function toggleSim(){if(simTimer){stopSim();return;}if(state.mode!=='demo')return;const r=state.shipments.find(x=>x.NO==='DO-005'&&!arrived(x));if(!r){toast('Reset demo terlebih dahulu untuk menjalankan contoh animasi.');return;}state.selected=r.NO;simStep=0;$('playDemo').textContent='Ⅱ Jeda simulasi';simTimer=setInterval(()=>{if(document.hidden||state.view!=='overview')return;const p=DEMO_PATH[simStep];r.LAT=p[0];r.LNG=p[1];r['GPS UPDATE']=new Date().toISOString();r['GPS HISTORY']=DEMO_PATH.slice(0,simStep+1).map(a=>({lat:a[0],lng:a[1],source:'Demo'}));renderDetail();renderMap(false);simStep++;if(simStep>=DEMO_PATH.length){stopSim();toast('Simulasi selesai. Posisi tidak berulang otomatis.');}},1700);}
+function showView(view){state.view=view;document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.dataset.view===view));document.querySelectorAll('[data-nav]').forEach(el=>{el.classList.toggle('active',el.dataset.nav===view);el.setAttribute('aria-current',el.dataset.nav===view?'page':'false')});const titles={overview:['Kontrol pengiriman.','Semua perjalanan material, dalam satu pandangan.'],shipments:['Semua pengiriman.','Catat, cari, dan kelola setiap DO material.'],materials:['Material, terpantau.','Lihat kebutuhan, realisasi, dan sisa pengiriman.'],settings:['Ruang kendali.','Atur koneksi dan pahami sumber data tracking.']};$('pageTitle').textContent=titles[view][0];$('pageSubtitle').textContent=titles[view][1];(view==='shipments'?$('shipmentsMount'):$('overviewLower')).prepend($('shipmentPanel'));$('sidebar').classList.remove('open');$('mobileMenu').setAttribute('aria-expanded','false');if(view==='overview'&&map)setTimeout(()=>map.invalidateSize(),50);}
+function field(name,label,value='',type='text',required=false,full=false,extra=''){return `<label class="field ${full?'full':''}">${esc(label)}${required?' *':''}<input name="${name}" type="${type}" value="${esc(value)}" ${required?'required':''} ${extra}></label>`;}
+function dialog(title,body,onSubmit,submit='Simpan'){formAction=onSubmit;$('dialogTitle').textContent=title;$('dialogBody').innerHTML=body;$('submitDialog').textContent=submit;$('dialogFooter').classList.toggle('hidden',!onSubmit);$('submitDialog').disabled=false;$('closeDialog').disabled=false;$('cancelDialog').disabled=false;if(!$('dialog').open)$('dialog').showModal();}
+function formError(message){let el=$('formError');if(!el){el=document.createElement('div');el.id='formError';el.className='form-error';el.setAttribute('role','alert');$('dialogBody').append(el)}el.textContent=message;el.scrollIntoView({block:'nearest'});}
+function fieldsHTML(r){return field('no','No. DO / resi',r?.NO||'','text',true,false,'maxlength="100"')+field('tgl_berangkat','Tanggal berangkat',today(),'date',true)+field('item','Item material',r?.ITEM||'','text',true,true,'list="materialOptions" maxlength="200"')+`<datalist id="materialOptions">${[...new Set(state.orders.map(x=>x.ITEM))].map(v=>`<option value="${esc(v)}">`).join('')}</datalist>`+field('mutu','Mutu / spesifikasi','','text',false)+field('satuan','Satuan (pcs, m², m³…)','','text',true,false,'maxlength="30"')+field('jumlah','Jumlah','','number',true,false,'min="0.001" step="any"')+field('plat','Plat kendaraan','','text',true,false,'maxlength="50"')+field('pengemudi','Nama pengemudi','','text',true,false,'maxlength="100"')+field('eta','ETA tim logistik','','datetime-local',false)+field('asal','Nama asal / supplier','','text',false)+field('tujuan','Nama site tujuan','','text',false);}
+function localISO(v){if(!v)return '';const d=new Date(v);if(!Number.isFinite(d.getTime()))return '';const offset=d.getTimezoneOffset();return new Date(d.getTime()-offset*60000).toISOString().slice(0,16);}
+function openAdd(){dialog('Pengiriman baru',`<div class="form-note">Catat satu material per DO. ETA memakai zona waktu perangkat. Koordinat rute boleh ditambahkan sekarang atau di spreadsheet.</div><div class="fields">${fieldsHTML()}</div><details class="advanced"><summary>Koordinat asal & tujuan (opsional)</summary><div class="fields">${field('asal_lat','Latitude asal','','number',false,false,'step="any" min="-90" max="90"')}${field('asal_lng','Longitude asal','','number',false,false,'step="any" min="-180" max="180"')}${field('tujuan_lat','Latitude tujuan','','number',false,false,'step="any" min="-90" max="90"')}${field('tujuan_lng','Longitude tujuan','','number',false,false,'step="any" min="-180" max="180"')}${field('catatan','Catatan','','text',false,true,'maxlength="1000"')}</div></details>`,async d=>{if(state.shipments.some(r=>norm(r.NO)===norm(d.no)))throw Error('Nomor DO sudah dipakai.');if(!(Number(d.jumlah)>0))throw Error('Jumlah harus lebih besar dari nol.');for(const prefix of ['asal','tujuan'])if((d[prefix+'_lat']||d[prefix+'_lng'])&&!validPoint(d[prefix+'_lat'],d[prefix+'_lng']))throw Error('Isi pasangan latitude dan longitude yang valid.');await mutate({...d,action:'tambah_resi',eta:d.eta?new Date(d.eta).toISOString():''});},'Simpan pengiriman');$('dialogForm').elements.namedItem('item').addEventListener('change',e=>{const order=state.orders.find(x=>norm(x.ITEM)===norm(e.target.value));if(order)$('dialogForm').elements.namedItem('satuan').value=order.SATUAN});}
+function openEdit(r){modalRow={...r};dialog('Edit '+r.NO,`<div class="fields">${field('no_baru','No. DO',r.NO,'text',true)}${field('plat','Plat kendaraan',r['PLAT KENDARAAN'],'text',true)}${field('jumlah','Jumlah',r.JUMLAH,'number',true,false,'step="any" min="0.001"')}${field('satuan','Satuan',r.SATUAN,'text',true)}${field('eta','ETA tim logistik',localISO(r.ETA),'datetime-local',false,true)}${field('catatan','Catatan',r.CATATAN,'text',false,true,'maxlength="1000"')}</div><p class="subtitle">Jika nomor DO berubah, tautan sopir lama tidak berlaku.</p>`,async d=>{if(state.shipments.some(x=>norm(x.NO)===norm(d.no_baru)&&String(x.NO)!==String(r.NO)))throw Error('Nomor DO sudah dipakai.');await mutate({...d,action:'edit_resi',no_lama:r.NO,expected_updated_at:modalRow['UPDATED AT']||'',eta:d.eta?new Date(d.eta).toISOString():''});state.selected=d.no_baru;renderAll();});}
+function openArrival(r){modalRow={...r};dialog('Konfirmasi penerimaan',`<div class="form-note"><b>${esc(r.NO)}</b> · ${esc(r.ITEM)}<br>Seluruh muatan ${fmt(r.JUMLAH)} ${esc(r.SATUAN)} akan ditandai diterima. Penerimaan sebagian belum tersedia.</div><div class="fields">${field('tanggal_sampai','Tanggal sampai',today(),'date',true,false,`max="${today()}"`)}${field('penerima','Nama penerima','','text',true,false,'maxlength="100"')}${field('bukti_url','Tautan foto / surat jalan (opsional)','','url',false,true,'placeholder="https://…"')}</div>`,async d=>{if(d.tanggal_sampai<r['TANGGAL BERANGKAT']?.slice(0,10))throw Error('Tanggal sampai lebih awal dari keberangkatan.');await mutate({...d,action:'update_sampai',no:r.NO,expected_updated_at:modalRow['UPDATED AT']||''});},'Konfirmasi diterima');}
+function openLocation(r){dialog('Perbarui lokasi '+r.NO,`<div class="form-note">Koordinat ini akan diberi label <b>Manual</b>. Untuk GPS dari kendaraan, gunakan tautan sopir di HP yang berada di kendaraan tersebut.</div><div class="fields">${field('lat','Latitude',r.LAT,'number',true,false,'step="any" min="-90" max="90"')}${field('lng','Longitude',r.LNG,'number',true,false,'step="any" min="-180" max="180"')}</div>`,async d=>{if(!validPoint(d.lat,d.lng))throw Error('Koordinat tidak valid.');await mutate({...d,action:'update_lokasi',no:r.NO});},'Simpan lokasi manual');}
+function openTarget(){dialog('Target material baru',`<div class="fields">${field('item','Nama item material','','text',true,true)}${field('total_pesanan','Total target','','number',true,false,'min="0.001" step="any"')}${field('satuan','Satuan','','text',true)}</div><p class="subtitle">Gunakan nama item dan satuan yang sama dengan DO. Untuk mengubah target yang sudah ada, edit angka pada Master_Pesanan.</p>`,async d=>{if(state.orders.some(x=>norm(x.ITEM)===norm(d.item)&&norm(x.SATUAN)===norm(d.satuan)))throw Error('Target item dan satuan ini sudah ada.');await mutate({...d,action:'tambah_pesanan'});},'Simpan target');}
+function validAPI(value){try{const u=new URL(value);return u.protocol==='https:'&&u.hostname==='script.google.com'&&/^\/macros\/s\/[\w-]+\/exec$/.test(u.pathname)}catch(e){return false}}
+function openConnection(){dialog('Hubungkan spreadsheet',`<div class="form-note">Pasang Code.gs v2 dahulu, isi kode akses, jalankan <b>setup()</b>, lalu deploy sebagai Web app. Masukkan URL yang berakhir <b>/exec</b>.</div><div class="fields">${field('url','URL Google Apps Script',settings.url,'url',true,true,'placeholder="https://script.google.com/macros/s/…/exec"')}${field('key','Kode akses (sesuai Code.gs)',settings.key,'password',true,true,'autocomplete="off"')}${field('driverURL','Alamat Driver.html (opsional)',settings.driverURL,'url',false,true,'placeholder="https://username.github.io/aplikasi/Driver.html"')}</div><p class="subtitle">Kode hanya disimpan di sesi tab. Isi alamat sopir bila dashboard dan Driver.html berada di lokasi berbeda.</p>`,async d=>{if(!validAPI(d.url))throw Error('Gunakan URL deployment Google Apps Script /exec yang valid.');if(d.driverURL&&!/^https:\/\//i.test(d.driverURL))throw Error('Alamat halaman sopir harus HTTPS.');const data=await apiRequest({action:'read'},d.url,d.key);checkSnapshot(data);settings={url:d.url,key:d.key,driverURL:d.driverURL};storage.set('mt.url',d.url);storage.set('mt.key',d.key,true);storage.set('mt.driver',d.driverURL);stopSim();state.epoch++;state.mode='live';setSnapshot(data);renderAll(true);toast('Spreadsheet berhasil terhubung.');},'Hubungkan');}
+function checkSnapshot(d){if(d.status!=='success'||d.version!==2||!Array.isArray(d.pengiriman)||!Array.isArray(d.pesanan))throw Error(d.message||'Backend belum v2. Ganti Code.gs dan deploy versi baru terlebih dahulu.');}
+function setSnapshot(data){state.shipments=data.pengiriman;state.orders=data.pesanan;state.timezone=data.timezone||state.timezone;state.connected=true;state.lastSync=new Date().toISOString();const invalid=state.shipments.filter(r=>!Number.isFinite(qty(r.JUMLAH))).length;if(invalid)toast(`${invalid} baris memiliki jumlah berupa teks tidak valid. Ubah menjadi angka asli di spreadsheet.`,true);}
+async function apiRequest(payload,url=settings.url,key=settings.key){if(!validAPI(url))throw Error('URL Apps Script belum valid.');const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),30000);try{const res=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...payload,key}),signal:controller.signal,redirect:'follow'});if(!res.ok)throw Error('Server mengembalikan HTTP '+res.status);let data;try{data=await res.json()}catch(e){throw Error('Jawaban bukan JSON. Periksa akses deployment dan URL /exec.');}if(data.status!=='success')throw Error(data.message||'Server menolak permintaan.');return data;}catch(e){if(e.name==='AbortError')throw Error('Waktu koneksi habis. Untuk penyimpanan, periksa data dahulu sebelum mencoba lagi.');if(e instanceof TypeError)throw Error('Tidak dapat menghubungi server. Periksa internet, URL, dan akses Web app.');throw e;}finally{clearTimeout(timeout);}}
+async function refresh(manual=false){if(state.mode==='demo'){if(manual)toast('Mode demo aktif. Hubungkan spreadsheet untuk data asli.');return;}if(requestInFlight)return requestInFlight;const epoch=state.epoch;requestInFlight=(async()=>{try{const data=await apiRequest({action:'read'});checkSnapshot(data);if(epoch!==state.epoch)return;setSnapshot(data);renderAll();if(manual)toast('Data diperbarui.');}catch(e){if(epoch!==state.epoch)return;state.connected=false;renderStatus();if(manual)toast(e.message,true);}finally{requestInFlight=null;}})();return requestInFlight;}
+function demoMutate(d){const now=new Date().toISOString();let r=state.shipments.find(x=>String(x.NO)===String(d.no_lama||d.no));if(d.action==='tambah_resi'){r={NO:d.no,ITEM:d.item,MUTU:d.mutu,JUMLAH:Number(d.jumlah),SATUAN:d.satuan,'PLAT KENDARAAN':d.plat,'NAMA PENGEMUDI':d.pengemudi,'TANGGAL BERANGKAT':d.tgl_berangkat,'TANGGAL SAMPAI':'',ASAL:d.asal,TUJUAN:d.tujuan,'ASAL LAT':d.asal_lat,'ASAL LNG':d.asal_lng,'TUJUAN LAT':d.tujuan_lat,'TUJUAN LNG':d.tujuan_lng,ETA:d.eta,CATATAN:d.catatan,'UPDATED AT':now};state.shipments.push(r);state.selected=r.NO;}else if(d.action==='tambah_pesanan'){state.orders.push({ITEM:d.item,'TOTAL PESANAN':Number(d.total_pesanan),SATUAN:d.satuan});}else if(!r)throw Error('DO tidak ditemukan.');else if(d.action==='edit_resi'){Object.assign(r,{NO:d.no_baru,JUMLAH:Number(d.jumlah),SATUAN:d.satuan,'PLAT KENDARAAN':d.plat,ETA:d.eta,CATATAN:d.catatan,'UPDATED AT':now});}else if(d.action==='update_sampai'){Object.assign(r,{'TANGGAL SAMPAI':d.tanggal_sampai,PENERIMA:d.penerima,'BUKTI URL':d.bukti_url,'UPDATED AT':now});}else if(d.action==='update_lokasi'){Object.assign(r,{LAT:Number(d.lat),LNG:Number(d.lng),'GPS UPDATE':now,'SUMBER LOKASI':'Manual','UPDATED AT':now});r['GPS HISTORY']=[...(r['GPS HISTORY']||[]),{lat:Number(d.lat),lng:Number(d.lng),at:now,source:'Manual'}].slice(-180);}saveDemo();}
+async function mutate(payload){if(state.mode==='demo'){stopSim();demoMutate(payload);renderAll();toast('Tersimpan di data demo browser ini.');return;}if(requestInFlight)await requestInFlight;await apiRequest(payload);await refresh();toast(state.connected?'Perubahan berhasil disimpan.':'Server mengonfirmasi tersimpan. Muat ulang untuk melihat hasilnya.',!state.connected);}
+async function openDriverLink(r){if(state.mode==='demo'){dialog('Tautan khusus sopir',`<div class="form-note">Fitur ini aktif setelah spreadsheet terhubung.</div><p class="subtitle">Tautan hanya berwenang mengirim lokasi untuk <b>${esc(r.NO)}</b>. Sopir harus menekan Mulai dan menyetujui izin lokasi. Tautan baru membatalkan tautan sebelumnya.</p>`,null);return;}let base=settings.driverURL;if(!base){if(location.protocol==='https:'&&!/(^|\.)chatgpt(?:-team)?\.site$/.test(location.hostname))base=new URL('Driver.html',location.href).href;else{toast('Isi alamat Driver.html di Pengaturan sebelum membuat tautan.',true);openConnection();return;}}dialog('Buat tautan sopir',`<div class="form-note">Buat tautan baru untuk <b>${esc(r.NO)}</b>. Tautan sebelumnya akan dinonaktifkan.</div><p class="subtitle">Kirim hanya kepada pengemudi kendaraan ${esc(r['PLAT KENDARAAN'])}. Halaman sopir perlu tetap aktif untuk berbagi lokasi.</p>`,async()=>{const data=await apiRequest({action:'buat_tautan_driver',no:r.NO});await refresh();const link=new URL(base);link.hash=new URLSearchParams({no:r.NO,token:data.token,api:settings.url}).toString();setTimeout(()=>{dialog('Tautan sopir siap',`<div class="form-note">Tautan ini khusus <b>${esc(r.NO)}</b>. Berakhir saat pengiriman diterima atau tautan baru dibuat.</div><input class="link-output" readonly id="driverLinkOutput" value="${esc(link.href)}" aria-label="Tautan sopir"><button class="btn primary" type="button" id="copyDriver" style="margin-top:14px">Salin tautan</button>`,null);$('copyDriver').onclick=()=>copyText(link.href);},0);},'Buat tautan baru');}
+async function copyText(text){try{await navigator.clipboard.writeText(text);toast('Tersalin.')}catch(e){toast('Salin manual dari kolom yang ditampilkan.',true);const input=$('driverLinkOutput')||$('reportText');if(input){input.focus();input.select();}}}
+function reportText(){const rows=summary(state.shipments,state.orders);return `${state.mode==='demo'?'[CONTOH DATA DEMO]\n':''}LAPORAN PENGIRIMAN MATERIAL\n${timeLabel(new Date().toISOString())}\n\nDO aktif: ${state.shipments.filter(r=>!arrived(r)).length}\nDO diterima: ${state.shipments.filter(arrived).length}\nLewat ETA: ${state.shipments.filter(late).length}\n\n${rows.map((s,i)=>`${i+1}. ${s.item} (${s.unit})\nTarget: ${fmt(s.target)} | Diterima: ${fmt(s.received)}\nPerjalanan: ${fmt(s.transit)} | Belum dikirim: ${fmt(s.remaining)}${s.excess>0&&s.target>0?'\nMelebihi target: '+fmt(s.excess):''}`).join('\n\n')}`;}
+function openReport(){const report=reportText();dialog('Laporan material',`<p class="subtitle" style="margin:0 0 15px">Periksa sebelum membagikan. WhatsApp membuka draf; Anda memilih penerima dan mengirim sendiri.</p><textarea class="report-text" id="reportText">${esc(report)}</textarea><div class="buttons" style="margin-top:14px"><button type="button" class="btn" id="copyReport">Salin laporan</button><button type="button" class="btn primary" id="waReport">Buka WhatsApp</button></div>`,null);$('copyReport').onclick=()=>copyText($('reportText').value);$('waReport').onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent($('reportText').value),'_blank','noopener,noreferrer');}
+function csvCell(v){const s=String(v??'');return '"'+(/^[\s]*[=+@\-\t\r]/.test(s)?"'"+s:s).replace(/"/g,'""')+'"';}
+function exportCSV(){const cols=['NO','ITEM','MUTU','JUMLAH','SATUAN','PLAT KENDARAAN','NAMA PENGEMUDI','TANGGAL BERANGKAT','TANGGAL SAMPAI','PENERIMA','ETA','SUMBER LOKASI','GPS UPDATE'];const csv='\ufeff'+[cols,...filtered().map(r=>cols.map(c=>r[c]??''))].map(row=>row.map(csvCell).join(',')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'})),a=document.createElement('a');a.href=url;a.download=(state.mode==='demo'?'DEMO-':'')+'pengiriman-'+today()+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function wire(){document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>showView(b.dataset.nav));document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>showView(b.dataset.go));$('mobileMenu').onclick=()=>{const open=$('sidebar').classList.toggle('open');$('mobileMenu').setAttribute('aria-expanded',String(open))};$('addBtn').onclick=openAdd;$('addTarget').onclick=openTarget;$('reportBtn').onclick=openReport;$('refreshBtn').onclick=()=>refresh(true);$('fitMap').onclick=fitBounds;$('playDemo').onclick=toggleSim;$('csvBtn').onclick=exportCSV;$('connectSettings').onclick=openConnection;$('disconnectBtn').onclick=()=>{storage.remove('mt.key',true);settings.key='';loadDemo();toast('Mode demo aktif. Data spreadsheet tidak diubah.');};$('resetDemo').onclick=()=>{if(state.mode!=='demo'){toast('Beralih ke mode demo dahulu.');return;}storage.remove('mt.demo');loadDemo(true);toast('Contoh demo direset.');};$('searchInput').oninput=e=>{state.query=e.target.value;state.page=1;renderTable()};$('statusTabs').onclick=e=>{const b=e.target.closest('[data-filter]');if(b){state.filter=b.dataset.filter;state.page=1;renderTable();}};$('shipmentRows').onclick=e=>{const row=e.target.closest('[data-no]');if(row){selectShipment(row.dataset.no);if(state.view==='shipments'){showView('overview');$('detail').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});}}};$('prevPage').onclick=()=>{state.page--;renderTable()};$('nextPage').onclick=()=>{state.page++;renderTable()};const close=()=>{if(!state.busy)$('dialog').close();};$('closeDialog').onclick=close;$('cancelDialog').onclick=close;$('dialog').addEventListener('cancel',e=>{if(state.busy)e.preventDefault()});$('dialogForm').onsubmit=async e=>{e.preventDefault();if(state.busy||!formAction)return;const action=formAction,d=Object.fromEntries(new FormData(e.target).entries()),label=$('submitDialog').textContent;state.busy=true;$('submitDialog').disabled=true;$('closeDialog').disabled=true;$('cancelDialog').disabled=true;$('submitDialog').textContent='Menyimpan…';$('formError')?.remove();try{await action(d);$('dialog').close();}catch(err){formError(err.message||'Penyimpanan gagal.');}finally{state.busy=false;$('submitDialog').disabled=false;$('closeDialog').disabled=false;$('cancelDialog').disabled=false;$('submitDialog').textContent=label;}};document.addEventListener('visibilitychange',()=>{if(!document.hidden&&state.mode==='live'&&!state.busy)refresh()});window.addEventListener('online',()=>{if(state.mode==='live')refresh()});pollTimer=setInterval(()=>{if(!document.hidden&&!state.busy){if(state.mode==='live')refresh();else{renderStats();renderDetail();renderMap(false);}}},60000);}
+async function boot(){wire();if(settings.url&&settings.key){state.mode='live';state.epoch++;renderAll();initMap();await refresh(true);fitBounds();}else{loadDemo();initMap();}}
+window.MaterialTrackCore={summary,qty,arrived,late,gpsState,validPoint,esc,csvCell,validAPI};
+if(!window.__MT_TEST__)boot();
 </script>
-</body>
-</html>
+</body></html>
